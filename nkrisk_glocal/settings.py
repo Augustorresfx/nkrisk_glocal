@@ -35,7 +35,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 # Versiones viejas de Android o IOS
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = True
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
