@@ -1,0 +1,5 @@
+[
+    {"model": "glocal.Pais", "pk": 1, "fields": {"nombre": "Argentina", "codigo": "ARG"}},
+    {"model": "glocal.Pais", "pk": 2, "fields": {"nombre": "Brasil", "codigo": "BRA"}},
+    {"model": "glocal.Pais", "pk": 3, "fields": {"nombre": "Chile", "codigo": "CHL"}}
+]

@@ -1,0 +1,351 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UNIBA LatAm | Glocal System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+          * {
+      box-sizing: border-box; 
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin: 0;
+      padding: 0;
+      font-family: "Montserrat", sans-serif;
+      height: 100vh;
+      width: 100%;
+      background-color: #041324;
+      overflow: hidden; /* Prevenir desplazamiento */
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px; /* Espacio debajo del logo */
+    }
+    
+    .logo-container img {
+      max-width: 50%;
+      max-height: 50%;
+    }
+    
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Asegúrate de que el canvas esté detrás de tu formulario */
+    }
+    
+    .form-area {
+      z-index: 0;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+    .wrapper {
+      z-index: 1;
+      flex: 1;
+      position: absolute;
+      align-items:center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: auto;
+      color: #fff;
+      padding: 30px 30px;
+      box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
+      background:rgba(4, 19, 36, 0.92);
+      
+      box-shadow: 0 0 30px #0000002a;
+      border-radius: 25px;
+    }
+    .wrapper h2 {
+      text-align: center;
+      margin: 0;
+      margin-bottom: 30px;
+    }
+    .wrapper p {
+      margin: 0;
+      padding: 0;
+      font-weight: 300;
+      text-align: center;
+    }
+    .box {
+      position: relative;
+    }
+    .box input {
+      padding-right: 30px;
+    }
+    .box i {
+      position: absolute;
+      top: 34%;
+      transform: translateY(-50%);
+      right: 30px;
+      color: #fff;
+    }
+    .wrapper input, button {
+      border: none;
+      border: 1px solid #bababa;
+      background: transparent;
+      outline: none;
+      height: 50px;
+      color: #ffffff;
+      font-size: 16px;
+      width: 100%;
+      margin-bottom: 5px;
+      padding: 15px;
+      border-radius: 12px;
+    }
+    .wrapper .options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .wrapper .options label {
+      color: #fff;
+      font-size: 18px;
+      line-height: 3.5;
+    }
+    .options input[type="checkbox"] {
+      width: 15px;
+      height: auto;
+    }
+    .wrapper a {
+      text-decoration: none;
+      color: #fff;
+    }
+    .wrapper button {
+      background: #00FFF8;
+      color: #262626;
+      font-weight: 600;
+
+    }
+
+    
+    
+    .sponsor-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px auto; /* Añade espacio alrededor de este contenedor */
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+      max-width: 90%; /* Evita que se expanda demasiado */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      bottom: 0;
+    }
+    #submit {
+      font-weight: 600 !important;
+    }
+    .footer {
+      background-color: transparent;  /* Color de fondo del footer */
+      color: #fff; 
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+    
+    .footer-img {
+      max-width: 70%;   /* Se ajusta al 100% del ancho del contenedor */
+      height: auto;      /* Mantiene la proporción de la imagen */
+
+      margin: 0 auto;    /* Centra la imagen horizontalmente */
+      display: block;    /* Asegura que la imagen se comporte como un bloque */
+      margin-bottom: 20px;
+    }
+    
+    /* Para móviles, puedes hacerla más pequeña si lo prefieres */
+    @media (max-width: 576px) {
+      .footer-img {
+        max-width: 380px; /* Ajuste el tamaño para pantallas pequeñas */
+      }
+    }
+    </style>
+     <script type="importmap">
+      {
+				"imports": {
+					"three": "https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js",
+          "jsm/": "https://cdn.jsdelivr.net/npm/three@0.170/examples/jsm/"
+        }
+			}
+    </script>
+    <script>
+      import * as THREE from "three";
+import { OrbitControls } from 'jsm/controls/OrbitControls.js';
+import getStarfield from "{% static '/src/getStarfield.js' %}";
+import { drawThreeGeo } from "{% static '/src/threeGeoJSON.js' %}";
+
+const w = window.innerWidth;
+const h = window.innerHeight;
+const scene = new THREE.Scene();
+
+// Cambiar el color de fondo de la escena (por ejemplo, azul claro)
+scene.background = new THREE.Color(0x041324);  // Color de fondo (azul cielo)
+
+// Si deseas mantener la niebla, puedes ajustarla o eliminarla
+// scene.fog = new THREE.FogExp2(0x000000, 0.3); // Niebla oscura (comentada aquí si no la necesitas)
+
+const camera = new THREE.PerspectiveCamera(75, w / h, 1, 100);
+camera.position.z = 3.4;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(w, h);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+const geometry = new THREE.SphereGeometry(2);
+const lineMat = new THREE.LineBasicMaterial({ 
+  color: 0x0170BA,
+  transparent: true,
+  opacity: 0.4, 
+});
+const edges = new THREE.EdgesGeometry(geometry, 1);
+const line = new THREE.LineSegments(edges, lineMat);
+
+// Crear un grupo para contener tanto el globo como los países
+const globeGroup = new THREE.Group();
+globeGroup.add(line);  // Añadir el globo al grupo
+
+const stars = getStarfield({ numStars: 1000, fog: false });
+scene.add(stars);
+
+// Check for more datasets
+fetch("{% static 'ne_110m_land.json' %}")
+  .then(response => response.text())
+  .then(text => {
+    const data = JSON.parse(text);
+
+    // Aquí definimos un color fijo para todos los países
+    const countries = drawThreeGeo({
+      json: data,
+      radius: 2,
+      materialOptions: {
+        color: 0x0170BA,  // Color fijo para todos los países (verde en este caso)
+        fillColor: 0x0170BA, // Color de relleno (dentro del polígono)
+        opacity: 1 // Opacidad del relleno
+      },
+    });
+
+    globeGroup.add(countries);  // Añadir los países al grupo
+    scene.add(globeGroup);      // Añadir el grupo a la escena
+  });
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  // Rotar todo el grupo (globo + países) alrededor del eje Y
+  globeGroup.rotation.y += 0.001;  // Rota en el eje Y (giro horizontal del globo)
+
+  renderer.render(scene, camera);
+  controls.update();
+}
+
+animate();
+
+function handleWindowResize () {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', handleWindowResize, false);
+
+
+  </script>
+  </head>
+  <body>
+    <body>
+
+      <div class="wrapper">
+        <div class="logo-container">
+          <img src="{% static 'svg/logo.svg' %}" alt="Logo">
+        </div>
+        
+        <p>Explora tus Programas de Seguro a Nivel Mundial</p>
+        <div class="col-md-12 col-lg-12 col-xl-12 offset-xl-0">
+          <!-- Formulario para dispositivos de tamaño pequeño -->
+          <form action="/login/" method="POST" class="d-block d-sm-none">
+              {{error}}
+              {% csrf_token %}
+            <div class="d-flex flex-row align-items-center justify-content-start justify-content-lg-start">
+              <div class="divider d-flex align-items-center my-2">
+
+              </div>
+            </div>
+            <!-- Email input -->
+            <div class="form-outline mb-1">
+              <input type="text" id="username" name="username" class="form-control form-control-md rounded-0"
+                placeholder="Usuario" />
+              <label class="form-label" for="form3Example3">Nombre de usuario</label>
+            </div>
+  
+            <!-- Password input -->
+            <div class="form-outline mb-1">
+              <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control form-control-md rounded-0"
+                  placeholder="Contraseña" />
+              </div>
+              <label class="form-label" for="form3Example4">Contraseña</label>
+            </div>
+            <div class="text-start text-lg-start">
+              <button id="submit" type="submit" class="btn btn-dark mb-4 rounded-0 btn-md" style="padding-left: 2.5rem; padding-right: 2.5rem;">Ingresar</button>
+            </div>
+          </form>
+          <!-- Formulario para dispositivos de tamaño mediano y grande -->
+          <form action="/login/" method="POST" class="d-none d-sm-block">
+              {{error}}
+              {% csrf_token %}
+            <div class="d-flex flex-row align-items-center justify-content-start justify-content-lg-start">
+              <div class="divider d-flex align-items-center my-3">
+   
+              </div>
+            </div>
+            <!-- Email input -->
+            <div class="form-outline mb-4">
+              <input type="text" id="username" name="username" class="form-control form-control-lg rounded-0"
+                placeholder="Usuario" />
+              <label class="form-label" for="form3Example3">Nombre de usuario</label>
+            </div>
+  
+            <!-- Password input -->
+            <div class="form-outline mb-3">
+              <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control form-control-lg rounded-0"
+                  placeholder="Contraseña" />
+              </div>
+              <label class="form-label" for="form3Example4">Contraseña</label>
+            </div>
+            <div class="text-start text-lg-start ">
+              <button id="submit" type="submit" class="btn btn-dark rounded-0 btn-lg" style="padding-left: 2.5rem; padding-right: 2.5rem; font-weight:300;">Ingresar</button>
+            </div>
+          </form>
+        </div>
+        
+      </div id="sponsor-row">
+      <div></div>
+      <footer class="footer">
+        <img src="{% static 'svg/brands-login.svg' %}" alt="Patrocinador 1" class="footer-img">
+        &copy; 2025 UNIBA LatAm | Glocal System.
+      </footer>
+      <script type="module" src="{% static '/js/index.js' %}"></script>
+        <!-- jQuery -->
+         
+        <!-- Bootstrap -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>
