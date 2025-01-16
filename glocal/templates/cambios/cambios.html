@@ -1,0 +1,247 @@
+{% extends 'index_master.html' %}
+{% load static %}
+{% block content %}
+
+    <!-- page content -->
+        <div class="right_col" role="main">
+          <h1>Cambios pendientes</h1>
+
+      <!-- messages -->
+          {% if messages %}
+
+          {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger m-2 " role="alert">
+              {{ message }}
+            </div>
+            {% elif message.tags == 'success' %}
+            <div class="alert alert-success m-2" role="alert">
+              {{ message }}
+            </div>
+            {% else %}
+            <div class="alert alert-primary m-2" role="alert">
+              {{ message }}
+            </div>
+            {% endif %}
+          {% endfor %}
+  
+        {% endif %}
+        
+      <!-- messages -->
+            <div class="row mb-4 ">
+              <div class="col-md-12 col-sm-12 ">
+                <div class="col-md-2 col-sm-4">
+                  <span>Nombre</span>
+                  <div >
+                    <input type="text" class="form-control form-control-sm col-md-8 col-sm-4" id="nombreMatriz">
+                  </div>
+                   
+                </div>
+                
+                <div class="col-md-2 col-sm-4 ">
+                  <span class="count_top">País</span>
+                  <div class="count">
+                    <select name="pais" class="form-select form-control-sm col-md-8 col-sm-4" aria-label="Default select example">
+                      <option selected>País</option>
+                      {% for pais in paises %}
+                      <option value="{{pais.id}}">{{pais.nombre}}</option>
+                     {% endfor %}
+                    </select>
+                  </div>
+                 
+                      
+                </div>
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Buscar</span>
+                  <div class=""><!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
+                      <i class="fa fa-search"></i>
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Nuevo</span>
+                  <div class=""><!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#nuevo">
+                      <i class="fa fa-plus"></i>
+                      Nuevo
+                    </button>
+                    
+                   
+                    <!-- Modal -->
+                    <form method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                    <div class="modal fade" id="nuevo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Nueva matriz</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            
+                            <div class="mb-3">
+                              <label for="nuevo_nombre" class="form-label">Nombre de la matriz: </label>
+                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre de la matriz" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_pais" class="form-label">País: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_pais" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for pais in paises %}
+                                  <option value="{{pais.id}}">{{pais.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                              
+                              <div class="mb-3">
+                                <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
+                              <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
+                              <input type="hidden" name="nuevo_activo" value="False">
+                              <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" value="on" {% if matriz.activo %}checked{% endif %}>
+
+                              </div>
+                              </div>
+                              
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                  </div>
+                  
+                </div>
+                </div>
+            </div>
+            <div class="row">
+              <div class="table-responsive m-2">
+              
+                <table class="table bg-white rounded shadow-sm">
+                  <thead class="bg-light">
+                      <tr>
+                          <th scope="col">Modelo</th>
+                          <th scope="col">Objeto</th>
+                          <th scope="col">Campo</th>
+                          <th scope="col">Valor Anterior</th>
+                          <th scope="col">Valor Nuevo</th>
+                          <th scope="col">Acciones</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    {% for change in changes %}
+                        {% for field, values in change.changes.items %}
+                            <tr>
+                                {% if forloop.first %}
+                                    <td rowspan="{{ change.changes|length }}">{{ change.model_name }}</td>
+                                    <td rowspan="{{ change.changes|length }}">{{ change.object_id }}</td>
+                                    <td rowspan="{{ change.changes|length }}">
+                                        {% if change.is_deletion %}
+                                            <span class="text-danger">Eliminación</span>
+                                        {% else %}
+                                            Edición
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                                {% if not change.is_deletion %}
+                                    <td>{{ field }}</td>
+                                    <td>{{ values.old }}</td>
+                                    <td>{{ values.new }}</td>
+                                {% endif %}
+                                {% if forloop.first %}
+                                    <td rowspan="{{ change.changes|length }}">
+                                        <form method="POST" action="{% url 'approve_change' change.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="approve">
+                                            <button class="btn btn-sm btn-success" type="submit">Aprobar</button>
+                                        </form>
+                                    </td>
+                                    <td rowspan="{{ change.changes|length }}">
+                                        <form method="POST" action="{% url 'approve_change' change.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="reject">
+                                            <button class="btn btn-sm btn-danger" type="submit">Rechazar</button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+                
+                
+                
+              </table>
+              
+              </div>  
+              <div class="app-table">
+              <div class="table-output">
+        <tbody id="table-body" class="table-body"> </tbody></div>
+            </div>
+          </div>
+           
+          
+              <!--
+                MOVIMIENTOS
+              
+              <div class="">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                  <h2> 
+                    Flotas
+                  </h2>
+               
+        
+              </div>
+                
+                <div class="list-group overflow-auto" style="max-height: 360px;">
+                 
+                  {% for movimiento in movimientos %}
+                    <div  class="list-group-item">
+                      <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{movimiento.nombre_movimiento}}</h5>
+                        <div>
+                          <form method="POST" class="d-inline" action="{% url 'exportar_movimiento' flota.id movimiento.id %}">
+                            {% csrf_token %}
+                          <button type="submit" class="w-10 btn btn-sm btn-success exportar-excel mx-2">
+                            <span class="material-icons-outlined">
+                              file_download
+                              </span>
+                              
+                          </button>
+                        </form>
+                        <form method="POST" class="d-inline eliminar-formulario" action="{% url 'delete_movimiento' flota.id movimiento.id %}" id="eliminarFormulario">
+                          {% csrf_token %}
+                        <button type="button" class="w-10 btn btn-sm btn-danger eliminar-elemento confirmar-eliminar mx-2" onclick="confirmarEliminar()">
+                          <span class="material-icons-outlined">
+                            delete
+                            </span>
+                            
+                        </button>
+                      </form>
+        
+                        </div>
+                      </div>
+                      <p class="mb-1">{{movimiento.tipo_movimiento}}</p>
+                      
+                      <p class="mb-1">Creación: {{movimiento.created}}</p>
+                      
+                    </div>
+                  {% endfor %}
+                  
+                </div>
+              -->
+              </div>
+          </div>
+        <!-- /page content -->
+        <script src="{% static 'js/swal.js' %}"></script>
+{% endblock %}

@@ -23,6 +23,15 @@ urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
     path('inicio/', views.InicioView.as_view(), name='inicio'),
     
+        # MATRICES
+    path('matrices/', views.MatrizView.as_view(), name="matrices"),
+    path('matrices/<int:matriz_id>/eliminar/', views.EliminarMatrizView.as_view(), name='delete_matriz'),
+    path('matrices/<int:matriz_id>/editar/', views.EditarMatrizView.as_view(), name='update_matriz'),
+
+    # CAMBIOS PENDIENTES
+    path('cambios_pendientes/', views.CambiosPendientesView.as_view(), name='cambios_pendientes'),
+    path('approve-change/<int:change_id>/', views.PendingChangeApprovalView.as_view(), name='approve_change'),
+    
     # AUTENTICACIÓN
     path('login/', views.SignInView.as_view(), name="login"),
     path('logout/', views.SignOutView.as_view(), name="logout"), 
