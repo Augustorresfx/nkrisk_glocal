@@ -11,6 +11,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect
 from django.http import HttpResponseServerError
 from django.apps import apps
+from django.db import models
 
 # Importe Modelos
 from .models import Pais, Matriz, Broker, Aseguradora, PendingChange
@@ -23,10 +24,10 @@ def is_admin(user):
 # Home
 class HomeView(View):
     def get(self, request, *args, **kwargs):
-        context = {
-            
-        }
-        return render(request, 'homepage/index2.html', context)
+        if request.user.is_authenticated:
+            return redirect('inicio')
+        else:
+            return redirect('login')
     
 # Inicio
 @method_decorator(login_required, name='dispatch')
@@ -38,7 +39,7 @@ class InicioView(View):
         }
         return render(request, 'homepage/index.html', context)
     
-    
+# Cambios
 @method_decorator(login_required, name='dispatch')
 class CambiosPendientesView(View):
     def get(self, request, *args, **kwargs):
@@ -56,7 +57,7 @@ class CambiosPendientesView(View):
             'changes': changes
         }
 
-        return render(request, 'cambios/cambios.html', context=context)
+        return render(request, 'administracion/cambios_admin.html', context=context)
 
     
 # Matríz
@@ -64,48 +65,50 @@ class CambiosPendientesView(View):
 class MatrizView(View):
     def get(self, request, *args, **kwargs):
         matrices = Matriz.objects.all()
-        print(matrices)
         matrices_paginados = Paginator(matrices, 30)
         page_number = request.GET.get("page")
         filter_pages = matrices_paginados.get_page(page_number)
         paises = Pais.objects.all()
         context = {
-            'matrices': matrices, 
+            'matrices': matrices,
             'pages': filter_pages,
             'paises': paises,
-
         }
-        return render(request, 'matrices/matrices.html', context)
+        return render(request, 'administracion/matrices_admin.html', context)
+
     def post(self, request, *args, **kwargs):
-        # Obtener los datos del formulario directamente desde request.POST
-        
+        # Obtener datos del formulario
         nombre = request.POST.get('nuevo_nombre')
         pais_id = request.POST.get('nuevo_pais')
         activo = request.POST.get('nuevo_activo')
-        print(f"Activo recibido: {activo}")
         if activo == "on":
             activo = True
-        print(f"Activo cambiado: {activo}")
+        else:
+            activo = False
         pais = get_object_or_404(Pais, id=pais_id)
         user = request.user
-        # Crea una nueva instancia de Matriz
-        nueva_matriz = Matriz(
-            
-            nombre=nombre,
-            pais=pais,
-            activo=activo,
-            modified_by=user,
-        )
-        try:
-            # Intenta crear el nuevo elemento
-            nueva_matriz.save()
-            messages.success(request, 'El elemento se creó exitosamente.')
-        except Exception as e:
-            # Si hay un error al crear el elemento, captura la excepción
-            messages.error(request, f'Error: No se pudo crear el elemento. Detalles: {str(e)}')
 
-        # Redirige, incluyendo los mensajes en el contexto
+        # Crear una solicitud de creación pendiente
+        changes = {
+            'nombre': {'new': nombre},
+            'pais_id': {'new': pais.id},
+            'activo': {'new': activo},
+        }
+
+        try:
+            PendingChange.objects.create(
+                model_name='matriz',
+                object_id=None,  # No existe aún
+                changes=changes,
+                submitted_by=user,
+                action_type='create',
+            )
+            messages.success(request, 'Solicitud de creación enviada para aprobación.')
+        except Exception as e:
+            messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
+
         return HttpResponseRedirect(request.path_info)
+
     
 @method_decorator(login_required, name='dispatch')
 class EditarMatrizView(View):
@@ -127,7 +130,7 @@ class EditarMatrizView(View):
 
             matriz.save()  # Guardar los cambios directamente
             messages.success(request, 'Los cambios se han aplicado directamente.')
-            return redirect('matrices')
+            return redirect('matrices_admin')
 
         # Para usuarios no superuser, registrar los cambios pendientes
         changes = {}
@@ -136,7 +139,7 @@ class EditarMatrizView(View):
             matriz.nombre = nombre
 
         if matriz.pais_id != int(pais_id):
-            changes['pais'] = {'old': matriz.pais_id, 'new': int(pais_id)}
+            changes['pais_id'] = {'old': matriz.pais_id, 'new': int(pais_id)}
             matriz.pais_id = pais_id
 
         if matriz.activo != activo:
@@ -158,7 +161,7 @@ class EditarMatrizView(View):
         else:
             messages.info(request, 'No se detectaron cambios.')
 
-        return redirect('matrices')
+        return redirect('matrices_admin')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -170,7 +173,7 @@ class EliminarMatrizView(View):
         if user.is_superuser:
             matriz.delete()
             messages.success(request, 'La matriz ha sido eliminada directamente.')
-            return redirect('matrices')
+            return redirect('matrices_admin')
 
         changes = {
             'activo': {'old': matriz.activo, 'new': False},  # Simula desactivación
@@ -187,52 +190,55 @@ class EliminarMatrizView(View):
         except Exception as e:
             messages.error(request, f'Error al registrar el cambio: {str(e)}')
 
-        return redirect('matrices')
+        return redirect('matrices_admin')
 
 
 # Utils
-
 @method_decorator(login_required, name='dispatch')
 class PendingChangeApprovalView(View):
     def post(self, request, change_id):
         change = get_object_or_404(PendingChange, id=change_id)
-        usuario = change.submitted_by  # Ya es una instancia de User
+        usuario = change.submitted_by
         action = request.POST.get("action")
 
         if action == "approve":
-            # Obtener el modelo y la instancia correspondiente
+            # Obtener el modelo dinámicamente
             model = apps.get_model(app_label='glocal', model_name=change.model_name)
             instance = model.objects.get(pk=change.object_id)
 
             for field, values in change.changes.items():
                 if "new" not in values:
-                    messages.error(request, f"Error: No se encontró el valor 'new' para el campo {field}")
+                    messages.error(request, f"Error: No se encontró el valor 'nuevo' para el campo {field}")
                     return redirect('cambios_pendientes')
 
-                if field == "modified_by" or field == "submitted_by":
+                # Detectar dinámicamente si el campo es un ForeignKey
+                field_object = instance._meta.get_field(field)
+                if isinstance(field_object, models.ForeignKey):
+                    # Obtener el modelo relacionado
+                    related_model = field_object.related_model
+                    # Obtener la instancia del modelo relacionado
+                    related_instance = get_object_or_404(related_model, id=values["new"]["id"])
+                    setattr(instance, field, related_instance)
+                elif field == "modified_by" or field == "submitted_by":
                     setattr(instance, field, usuario)
-                elif field == "pais":
-                    pais_instance = get_object_or_404(Pais, id=values["new"])
-                    setattr(instance, field, pais_instance)
                 else:
-                    setattr(instance, field, values["new"])
+                    setattr(instance, field, values["new"]["id"] if isinstance(values["new"], dict) else values["new"])
 
-            # Guardar la instancia
+            # Guardar la instancia actualizada
             instance.save()
 
-            # Asegúrate de que el cambio pendiente sea aprobado inmediatamente
+            # Actualizar el estado del cambio pendiente
             change.approved = True
             change.save()
 
-            # Refrescar la base de datos
-            change.refresh_from_db()
-
+            messages.success(request, "Cambio aprobado exitosamente.")
             return redirect('cambios_pendientes')
 
         elif action == "reject":
-            # Si se rechaza el cambio, no se realiza ninguna modificación en la instancia
+            # Si se rechaza, actualizar el estado del cambio
             change.approved = False
             change.save()
+            messages.info(request, "Cambio rechazado.")
 
         return redirect('cambios_pendientes')
 

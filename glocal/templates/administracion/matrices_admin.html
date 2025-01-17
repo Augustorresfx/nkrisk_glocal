@@ -1,11 +1,10 @@
 {% extends 'index_master.html' %}
 {% load static %}
 {% block content %}
-{% load filters %}
 
     <!-- page content -->
-        <div class="right_col" role="main">
-          <h1>Cambios pendientes</h1>
+        <div class="right_col"  style="background-color:white;" role="main">
+          <h1 style="font-size:24px">Matrices</h1>
 
       <!-- messages -->
           {% if messages %}
@@ -29,9 +28,9 @@
         {% endif %}
         
       <!-- messages -->
-            <div class="row mb-4 ">
-              <div class="col-md-12 col-sm-12 ">
-                <div class="col-md-2 col-sm-4">
+            <div class="row mb-4 m-0">
+              <div class="col-md-12 col-sm-12 m-0 p-0">
+                <div class="col-md-2 col-sm-4 m-0 p-0">
                   <span>Nombre</span>
                   <div >
                     <input type="text" class="form-control form-control-sm col-md-8 col-sm-4" id="nombreMatriz">
@@ -107,7 +106,7 @@
                                 <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
                               <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
                               <input type="hidden" name="nuevo_activo" value="False">
-                              <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" value="on" {% if matriz.activo %}checked{% endif %}>
+                              <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" >
 
                               </div>
                               </div>
@@ -128,82 +127,107 @@
             <div class="row">
               <div class="table-responsive m-2">
               
-                <table class="table bg-white rounded shadow-sm">
-                  <thead class="bg-light">
-                      <tr>
-                          <th scope="col">Modelo</th>
-                          <th scope="col">Objeto</th>
-                          <th scope="col">Acción</th>
-                          <th scope="col">Campo</th>
-                          <th scope="col">Valor Anterior</th>
-                          <th scope="col">Valor Nuevo</th>
-                          <th colspan="2" class="text-center" scope="col">Acciones</th>
-                         
-                      </tr>
-                  </thead>
-                  <tbody>
-                    {% for change in changes %}
-                        {% for field, values in change.changes.items %}
-                            <tr>
-                                {% if forloop.first %}
-                                    <td rowspan="{{ change.changes|length }}">{{ change.model_name }}</td>
-                                    <td rowspan="{{ change.changes|length }}">{{ change.object_name }}</td>
-                                    <td rowspan="{{ change.changes|length }}">
-                                        {% if change.is_deletion %}
-                                            <span class="text-danger">Eliminación</span>
-                                        {% else %}
-                                            Edición
-                                        {% endif %}
-                                    </td>
-                                {% endif %}
-                                {% if not change.is_deletion %}
-                                    <td>{{ field }}</td>
-                                    <td>
-                                      {% if values.old|is_boolean %}
-                                          {{ values.old|boolean_to_text }}
-                                      {% else %}
-                                          {{ values.old }}
-                                      {% endif %}
-                                  </td>
-                                    <td>
-                                      {% if values.new|is_boolean %}
-                                          {{ values.new|boolean_to_text }}
-                                      {% else %}
-                                          {{ values.new }}
-                                      {% endif %}
-                                  </td>
-                                {% else %}
-                                    <td> </td>
-                                    <td> </td>
-                                    <td> </td>
-                                {% endif %}
+                  <table class="table bg-white rounded shadow-sm">
+                      <thead class="bg-light">
+                        <tr>
+                          <th scope="col">Nombre</th>
+                          <th scope="col">País</th>
+                          <th scope="col">Activo</th>
+                          
+  
+  
+  
+  
+  
+        
+                          <th scope="col">Editar</th>
+                          <th scope="col">Eliminar</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for matriz in pages %}
+                        
+                        <tr>
+                          <td>{{ matriz.nombre }}</td>
+                          <td>{{ matriz.pais }}</td>
+                          {% if matriz.activo %}
+                          <td class="green">Si</td>
+  
+                          {% else %}
+                          <td class="red">No</td>
+  
+                          {% endif %}
+                          
+        
+                          <td>
+                            <div data-backdrop="false" class=""><!-- Button trigger modal -->
+                              <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#editarModal{{ matriz.id }}">
+                                <i class="fa fa-edit"></i>
                                 
-
-                                {% if forloop.first %}
-                                    <td rowspan="{{ change.changes|length }}">
-                                        <form method="POST" action="{% url 'approve_change' change.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="approve">
-                                            <button class="btn btn-sm btn-success" type="submit">Aprobar</button>
-                                        </form>
-                                    </td>
-                                    <td rowspan="{{ change.changes|length }}">
-                                        <form method="POST" action="{% url 'approve_change' change.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="reject">
-                                            <button class="btn btn-sm btn-danger" type="submit">Rechazar</button>
-                                        </form>
-                                    </td>
-                                {% endif %}
-                            </tr>
+                              </button>
+                              
+                             
+                              <!-- Modal -->
+                              <form data-backdrop="false" method="post" action="{% url 'update_matriz' matriz.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                              <div data-backdrop="false" class="modal fade" id="editarModal{{ matriz.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div data-backdrop="false" class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                    <div class="modal-header">
+                                      <h5 class="modal-title" id="exampleModalLabel">Editar matriz</h5>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                      </button>
+                                    </div>
+                                    <div data-backdrop="false" class="modal-body">
+                                      
+                                      <div class="mb-3">
+                                        <label for="editar_nombre" class="form-label">Nombre de la matriz: </label>
+                                        <input name="editar_nombre" value="{{ matriz.nombre }}" type="text" class="form-control" aria-label="Nombre de la matriz" aria-describedby="basic-addon1">
+                                      </div>
+                                      <div class="mb-5">
+                                        <div class="form-group">
+                                          <label for="pais">País</label>
+                                          <select class="form-control" id="editar_pais" name="editar_pais">
+                                            {% for pais in paises %}
+                                            <option value="{{ pais.id }}" {% if pais.id == matriz.pais.id %}selected{% endif %}>
+                                              {{ pais.nombre }}
+                                            </option>
+                                            {% endfor %}
+                                          </select>
+                                        </div>
+                                        <div class="form-group">
+                                          <label for="activo">Activo</label><!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
+                                          <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if matriz.activo %}checked{% endif %}>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </form>
+                            </div>
+                            
+                          </td>
+                          <td>
+                            
+                            <button type="submit" class="w-10 btn btn-sm btn-danger eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_matriz' matriz.id %}">
+                              <span class="material-icons align-middle">
+                                delete
+                              </span>
+                            </button>
+                       
+                          
+                          </td>
+                        </tr>
+                       
+                    
                         {% endfor %}
-                    {% endfor %}
-                </tbody>
-                
-                
-                
-              </table>
-              
+                      </tbody>
+                  </table>
               </div>  
               <div class="app-table">
               <div class="table-output">
