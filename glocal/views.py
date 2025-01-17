@@ -47,6 +47,11 @@ class CambiosPendientesView(View):
         for change in changes:
             change.is_deletion = change.action_type == 'delete'  # Agrega un atributo al objeto
 
+            # Obtener el nombre del objeto
+            model_class = apps.get_model(app_label='glocal', model_name=change.model_name)  # Cambia 'app_name' por el nombre de tu aplicación
+            obj = model_class.objects.filter(pk=change.object_id).first()
+            change.object_name = obj.nombre if obj else 'N/A'
+
         context = {
             'changes': changes
         }

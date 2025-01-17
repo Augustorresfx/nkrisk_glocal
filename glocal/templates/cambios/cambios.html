@@ -1,6 +1,7 @@
 {% extends 'index_master.html' %}
 {% load static %}
 {% block content %}
+{% load filters %}
 
     <!-- page content -->
         <div class="right_col" role="main">
@@ -132,10 +133,12 @@
                       <tr>
                           <th scope="col">Modelo</th>
                           <th scope="col">Objeto</th>
+                          <th scope="col">Acción</th>
                           <th scope="col">Campo</th>
                           <th scope="col">Valor Anterior</th>
                           <th scope="col">Valor Nuevo</th>
-                          <th scope="col">Acciones</th>
+                          <th colspan="2" class="text-center" scope="col">Acciones</th>
+                         
                       </tr>
                   </thead>
                   <tbody>
@@ -144,7 +147,7 @@
                             <tr>
                                 {% if forloop.first %}
                                     <td rowspan="{{ change.changes|length }}">{{ change.model_name }}</td>
-                                    <td rowspan="{{ change.changes|length }}">{{ change.object_id }}</td>
+                                    <td rowspan="{{ change.changes|length }}">{{ change.object_name }}</td>
                                     <td rowspan="{{ change.changes|length }}">
                                         {% if change.is_deletion %}
                                             <span class="text-danger">Eliminación</span>
@@ -155,9 +158,27 @@
                                 {% endif %}
                                 {% if not change.is_deletion %}
                                     <td>{{ field }}</td>
-                                    <td>{{ values.old }}</td>
-                                    <td>{{ values.new }}</td>
+                                    <td>
+                                      {% if values.old|is_boolean %}
+                                          {{ values.old|boolean_to_text }}
+                                      {% else %}
+                                          {{ values.old }}
+                                      {% endif %}
+                                  </td>
+                                    <td>
+                                      {% if values.new|is_boolean %}
+                                          {{ values.new|boolean_to_text }}
+                                      {% else %}
+                                          {{ values.new }}
+                                      {% endif %}
+                                  </td>
+                                {% else %}
+                                    <td> </td>
+                                    <td> </td>
+                                    <td> </td>
                                 {% endif %}
+                                
+
                                 {% if forloop.first %}
                                     <td rowspan="{{ change.changes|length }}">
                                         <form method="POST" action="{% url 'approve_change' change.id %}">
