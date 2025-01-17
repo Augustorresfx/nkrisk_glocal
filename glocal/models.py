@@ -18,6 +18,7 @@ class PendingChange(models.Model):
     object_id = models.PositiveIntegerField()
     changes = models.JSONField()
     submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    submitted_at = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(null=True)
     action_type = models.CharField(max_length=10, choices=ACTION_CHOICES, default='edit')  # Campo adicional
 
@@ -49,22 +50,24 @@ class Matriz(models.Model):
                 if original_value != new_value:
                     changes[field_name] = {"old": original_value, "new": new_value}
 
-            # Crear cambios pendientes si hay diferencias
+            # Crear cambios pendientes si hay diferencias y no es un administrador
             if changes:
                 print(f"Changes detected: {changes}")
                 from .models import PendingChange
                 if self.modified_by and isinstance(self.modified_by, User):
-                    PendingChange.objects.create(
-                        model_name=self._meta.model_name,
-                        object_id=self.pk,
-                        changes=changes,
-                        submitted_by=self.modified_by,
-                    )
+                    if not self.modified_by.is_superuser:  # Excluir a superusuarios
+                        PendingChange.objects.create(
+                            model_name=self._meta.model_name,
+                            object_id=self.pk,
+                            changes=changes,
+                            submitted_by=self.modified_by,
+                        )
+                    else:
+                        print("El administrador modificó el objeto; no se crea PendingChange.")
                 else:
                     raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
 
         super().save(*args, **kwargs)  # Guardar el objeto normalmente
-
 
 class Broker(models.Model):
     nombre = models.CharField(max_length=100)

@@ -142,74 +142,43 @@
                   </div>
                 </li>
                 <!-- NOTIFICACIONES -->
+                {% if pending_changes %}
                 <li role="presentation" class="nav-item dropdown open">
                   <a href="javascript:;" class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
                     <i class="fa fa-envelope-o"></i>
-                    <div class="badge bg-green">6</div>
+                    <div class="badge bg-green">{{number_of_pending_changes}}</div>
                   </a>
                   <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
+                    {% for change in pending_changes %}
                     <li class="nav-item">
-                      <a class="dropdown-item">
-                        <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
+                      <a href="/cambios_pendientes" class="dropdown-item">
+                        <span class="image"><i class="fa fa-user mx-1"></i></span>
                         <span>
-                          <span>John Smith</span>
-                          <span class="time">3 mins ago</span>
+                          <span>{{change.submitted_by}}</span>
+                          <span class="time">{{change.submitted_at}}</span>
                         </span>
                         <span class="message">
-                          Film festivals used to be do-or-die moments for movie makers. They were where...
+                          {{change.get_action_type_display}}: {{change.model_name}}
                         </span>
                       </a>
                     </li>
-                    <li class="nav-item">
-                      <a class="dropdown-item">
-                        <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                        <span>
-                          <span>John Smith</span>
-                          <span class="time">3 mins ago</span>
-                        </span>
-                        <span class="message">
-                          Film festivals used to be do-or-die moments for movie makers. They were where...
-                        </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="dropdown-item">
-                        <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                        <span>
-                          <span>John Smith</span>
-                          <span class="time">3 mins ago</span>
-                        </span>
-                        <span class="message">
-                          Film festivals used to be do-or-die moments for movie makers. They were where...
-                        </span>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="dropdown-item">
-                        <span class="image"><img src="images/img.jpg" alt="Profile Image" /></span>
-                        <span>
-                          <span>John Smith</span>
-                          <span class="time">3 mins ago</span>
-                        </span>
-                        <span class="message">
-                          Film festivals used to be do-or-die moments for movie makers. They were where...
-                        </span>
-                      </a>
-                    </li>
+                    {% endfor %}
                     <li class="nav-item">
                       <div class="text-center">
-                        <a class="dropdown-item">
-                          <strong>See All Alerts</strong>
+                        <a href="/cambios_pendientes" class="dropdown-item">
+                          <strong>Ver todas las alertas</strong>
                           <i class="fa fa-angle-right"></i>
                         </a>
                       </div>
                     </li>
                   </ul>
                 </li>
+                {% endif %}
               </ul>
             </nav>
           </div>
         </div>
+        
         <!-- /top navigation -->
 
 
