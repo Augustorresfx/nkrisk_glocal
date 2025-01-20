@@ -131,13 +131,14 @@
                 <table class="table bg-white rounded shadow-sm">
                   <thead class="bg-light">
                       <tr>
+                          <th scope="col">Acciones</th>
                           <th scope="col">Modelo</th>
                           <th scope="col">Objeto</th>
                           <th scope="col">Acción</th>
                           <th scope="col">Campo</th>
                           <th scope="col">Valor Anterior</th>
                           <th scope="col">Valor Nuevo</th>
-                          <th colspan="2" class="text-center" scope="col">Acciones</th>
+
                          
                       </tr>
                   </thead>
@@ -145,6 +146,25 @@
                     {% for change in changes %}
                         {% for field, values in change.changes.items %}
                             <tr>
+                                {% if forloop.first %}
+                                
+                                    <td rowspan="{{ change.changes|length }}">
+                                      <div class="d-flex align-items-center">
+                                        <form method="POST" action="{% url 'approve_change' change.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="approve">
+                                            <button class="btn btn-lg btn-success py-0 px-1 border-0 mr-2" type="submit"><i class="fa fa-check"></i></button>
+                                        </form>
+
+
+                                        <form method="POST" action="{% url 'approve_change' change.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="reject">
+                                            <button class="btn btn-lg btn-danger py-0 px-1 border-0 mr-2" type="submit"><i class="fa fa-close"></i></button>
+                                        </form>
+                                      </div>
+
+                                {% endif %}
                                 {% if forloop.first %}
                                     <td rowspan="{{ change.changes|length }}">{{ change.model_name }}</td>
                                     
@@ -209,22 +229,7 @@
                                     </td>
                                 {% endif %}
                 
-                                {% if forloop.first %}
-                                    <td rowspan="{{ change.changes|length }}">
-                                        <form method="POST" action="{% url 'approve_change' change.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="approve">
-                                            <button class="btn btn-sm btn-success" type="submit">Aprobar</button>
-                                        </form>
-                                    </td>
-                                    <td rowspan="{{ change.changes|length }}">
-                                        <form method="POST" action="{% url 'approve_change' change.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="reject">
-                                            <button class="btn btn-sm btn-danger" type="submit">Rechazar</button>
-                                        </form>
-                                    </td>
-                                {% endif %}
+
                             </tr>
                         {% endfor %}
                     {% endfor %}
