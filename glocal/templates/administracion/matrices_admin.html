@@ -26,40 +26,40 @@
           {% endfor %}
   
         {% endif %}
-        
+
       <!-- messages -->
             <div class="row mb-4 m-0">
+              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'matrices_admin' %}">
               <div class="col-md-12 col-sm-12 m-0 p-0">
                 <div class="col-md-2 col-sm-4 m-0 p-0">
                   <span>Nombre</span>
                   <div >
-                    <input type="text" class="form-control form-control-sm col-md-8 col-sm-4" id="nombreMatriz">
+                    <input name="nombre" id="nombre"  value="{{ filtros.nombre|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
                   </div>
-                   
                 </div>
                 
                 <div class="col-md-2 col-sm-4 ">
                   <span class="count_top">País</span>
                   <div class="count">
-                    <select name="pais" class="form-select form-control-sm col-md-8 col-sm-4" aria-label="Default select example">
-                      <option selected>País</option>
+                    <select name="pais" id="pais" class="form-select form-control-sm col-md-8 col-sm-4" aria-label="Default select example">
+                      <option selected value="" >--Seleccione uno--</option>
                       {% for pais in paises %}
-                      <option value="{{pais.id}}">{{pais.nombre}}</option>
+                      <option value="{{ pais.id }}" {% if filtros.pais == pais.id|stringformat:"s" %}selected{% endif %}>{{pais.nombre}}</option>
                      {% endfor %}
                     </select>
                   </div>
-                 
-                      
                 </div>
+
                 <div class="col-md-2 col-sm-4">
                   <span class="count_top" style="visibility: hidden;">Buscar</span>
                   <div class=""><!-- Button trigger modal -->
-                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
+                    <button type="submit" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
                       <i class="fa fa-search"></i>
                       Buscar
                     </button>
                   </div>
                 </div>
+              </form>
                 <div class="col-md-2 col-sm-4">
                   <span class="count_top" style="visibility: hidden;">Nuevo</span>
                   <div class=""><!-- Button trigger modal -->
@@ -124,6 +124,7 @@
                 </div>
                 </div>
             </div>
+       
             <div class="row">
               <div class="table-responsive m-2">
               

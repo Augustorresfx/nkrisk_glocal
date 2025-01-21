@@ -64,15 +64,36 @@ class CambiosPendientesView(View):
 @method_decorator(login_required, name='dispatch')
 class MatrizView(View):
     def get(self, request, *args, **kwargs):
+        
+        # Obtener filtros desde los parámetros GET
+        nombre_filtro = request.GET.get('nombre', '').strip()
+        pais_filtro = request.GET.get('pais', '').strip()
+
+        # Filtrar las matrices con base en los filtros
         matrices = Matriz.objects.all()
+
+        if nombre_filtro:
+            matrices = matrices.filter(nombre__icontains=nombre_filtro)
+
+        if pais_filtro:
+            matrices = matrices.filter(pais__id=pais_filtro)
+
+        # Paginación
         matrices_paginados = Paginator(matrices, 30)
         page_number = request.GET.get("page")
         filter_pages = matrices_paginados.get_page(page_number)
+
+        # Obtener la lista de países
         paises = Pais.objects.all()
+
         context = {
             'matrices': matrices,
             'pages': filter_pages,
             'paises': paises,
+            'filtros': {
+                'nombre': nombre_filtro,
+                'pais': pais_filtro,
+            }
         }
         return render(request, 'administracion/matrices_admin.html', context)
 
