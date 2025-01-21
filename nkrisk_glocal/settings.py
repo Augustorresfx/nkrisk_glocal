@@ -22,7 +22,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # -> Esto da error si no se desactiva en desarrollo
-SECURE_SSL_REDIRECT = True
+#SECURE_SSL_REDIRECT = True
 
 # Cross-site Scripting (XSS)
 SECURE_BROWSER_XSS_FILTER = True
@@ -43,7 +43,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 SECRET_KEY = os.environ.get('SECRET_KEY', default='pQu!}YDjXfF~%+b,P]SxC[=EdM5z:VscK^W9HTq6g@7e3_yL{ak@UDh>m}uX<9*NrLQB7nZ:$;KG48a]Pw5sE,J6C?WYqVR/3pe+e3XdJYNDFuRqZ2K+[ybw`kEP@vM-c5r;t9{CBz.,%p]>A4T=/:DT&c^:[9wB<H?]Ep`7;zbs5dQ+agCt4-_*u.RKr>m~%!Z6Xv$FPf~6F5s8`LraDyu%b<k,2];XR*V:ve&_7>9SgGMEKw{?.nx^/4')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = True #'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
 
