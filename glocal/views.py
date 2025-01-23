@@ -115,18 +115,29 @@ class MatrizView(View):
             'pais_id': {'new': pais.id},
             'activo': {'new': activo},
         }
-
-        try:
-            PendingChange.objects.create(
-                model_name='matriz',
-                object_id=None,  # No existe aún
-                changes=changes,
-                submitted_by=user,
-                action_type='create',
-            )
-            messages.success(request, 'Solicitud de creación enviada para aprobación.')
-        except Exception as e:
-            messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
+        if user.is_superuser:
+            try:
+                Matriz.objects.create(
+                nombre = nombre,
+                pais=pais,
+                activo=activo,
+                )
+                messages.success(request, 'Se creó un nuevo elemento de forma exitosa.')
+            except Exception as e:
+                messages.error(request, f'Error: No se pudo crear el elemento. Detalles: {str(e)}')
+ 
+        else:
+            try:
+                PendingChange.objects.create(
+                    model_name='matriz',
+                    object_id=None,  # No existe aún
+                    changes=changes,
+                    submitted_by=user,
+                    action_type='create',
+                )
+                messages.success(request, 'Solicitud de creación enviada para aprobación.')
+            except Exception as e:
+                messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
 
         return HttpResponseRedirect(request.path_info)
 
