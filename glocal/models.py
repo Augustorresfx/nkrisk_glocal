@@ -46,7 +46,10 @@ class Contacto(models.Model):
         return self.nombre
     
     def save(self, *args, **kwargs):
-        if self.pk:  # Solo para objetos existentes
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
             original = self.__class__.objects.get(pk=self.pk)
             changes = {}
 

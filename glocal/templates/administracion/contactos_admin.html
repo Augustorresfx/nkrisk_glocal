@@ -209,16 +209,16 @@
                                             <input name="editar_cargo" value="{{ contacto.cargo }}" type="text" class="form-control" aria-label="Cargo del contacto" aria-describedby="basic-addon1">
                                           </div>
                                         <div class="mb-5">
-                                          <div class="form-group">
-                                            <label for="pais">Usuario</label>
-                                            <select class="form-control" id="editar_usuario" name="editar_usuario">
-                                              {% for usuario in usuarios %}
-                                              <option value="{{ usuario.id }}" {% if usuario.id == contacto.usuario.id %}selected{% endif %}>
-                                                {{ usuario.username }}
-                                              </option>
-                                              {% endfor %}
-                                            </select>
-                                          </div>
+                                            <div class="form-group">
+                                                <label for="editar_usuario">Usuario</label>
+                                                <select class="form-control" id="editar_usuario" name="editar_usuario">
+                                                  {% for usuario in usuarios %}
+                                                    <option value="{{ usuario.id }}" {% if usuario.id == contacto.user.id %}selected{% endif %}>
+                                                      {{ usuario.username }}
+                                                    </option>
+                                                  {% endfor %}
+                                                </select>
+                                              </div>
                                         </div>
                                       </div>
                                       <div class="modal-footer">

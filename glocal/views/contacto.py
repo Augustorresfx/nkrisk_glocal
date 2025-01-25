@@ -23,7 +23,6 @@ class ContactoView(View):
 
         # Filtrar los contactos con base en los filtros
         contactos = Contacto.objects.all()
-    
         if nombre_filtro:
             contactos = contactos.filter(nombre__icontains=nombre_filtro)
 
@@ -39,7 +38,9 @@ class ContactoView(View):
         contactos_paginados = Paginator(contactos, 30)
         page_number = request.GET.get("page")
         filter_pages = contactos_paginados.get_page(page_number)
+        for contacto in filter_pages:
 
+            print(contacto.user)
         # Obtener la lista de usuarios
         usuarios = User.objects.all()
         print("Usuarios: ", usuarios)

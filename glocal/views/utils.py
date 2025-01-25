@@ -41,12 +41,12 @@ class InicioView(View):
 class CambiosPendientesView(View):
     def get(self, request, *args, **kwargs):
         changes = PendingChange.objects.filter(approved__isnull=True)
-
+        print(changes)
         for change in changes:
             change.is_deletion = change.action_type == 'delete'  # Agrega un atributo al objeto
 
             # Obtener el nombre del objeto
-            model_class = apps.get_model(app_label='glocal', model_name=change.model_name)  # Cambia 'app_name' por el nombre de tu aplicación
+            model_class = apps.get_model(app_label='glocal', model_name=change.model_name)
             obj = model_class.objects.filter(pk=change.object_id).first()
             change.object_name = obj.nombre if obj else 'N/A'
 
@@ -72,12 +72,9 @@ class PendingChangeApprovalView(View):
             if change.action_type == "create":
                 # Crear una nueva instancia del modelo
                 instance = model(**{field: values["new"] for field, values in change.changes.items()})
-                print(instance)
+
                 instance.save()
-                
-                print(instance)
-                print(instance.modified_by)
-                print(instance.pais)
+
                 instance.modified_by = usuario  # Registrar quién realizó el cambio (sino es null)
                 instance.save(track_changes=False)  # Evitar registrar PendingChange
                 

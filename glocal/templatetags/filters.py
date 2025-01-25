@@ -1,6 +1,7 @@
 from django import template
 from django.apps import apps
 import datetime
+from django.contrib.auth.models import User
 
 register = template.Library()
 
@@ -34,14 +35,27 @@ def get_foreign_key_name(value, field_name):
     
     # Eliminar el sufijo '_id' del campo (si existe)
     field_name = field_name.rstrip('_id')
-    
-    # Buscar el modelo que contiene este campo
+    print("nombre del campo:", field_name)
+
     try:
-        model = apps.get_model('glocal', field_name)  # Asegúrate de que 'glocal' es el nombre correcto de la app
-        related_object = model.objects.filter(pk=value).first()
+        # Verificar si el campo es 'user', y en ese caso usar el modelo User
+        if field_name == 'user':
+            related_object = User.objects.filter(pk=value).first()
+            model = User  # No necesitamos acceder a `model` más tarde
+        else:
+            # Si no es el campo 'user', obtener el modelo dinámicamente
+            model = apps.get_model('glocal', field_name)  # 'glocal' debe ser el nombre correcto de la app
+            related_object = model.objects.filter(pk=value).first()
+
+        print("Objeto encontrado:", related_object)
+        
+        # Devolver el nombre del objeto relacionado si se encuentra, o "N/A"
         return str(related_object) if related_object else "N/A"
+    
     except Exception as e:
-        return "N/A"  # Si hay un error, retorna N/A
+        print(f"Error al obtener el objeto: {e}")
+        return "N/A"  # Si hay un error, retornar "N/A"
+
 
 @register.filter
 def get_years_to_current(value):
