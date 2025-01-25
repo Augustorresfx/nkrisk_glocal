@@ -1,0 +1,313 @@
+{% extends 'index_master.html' %}
+{% load static %}
+{% block content %}
+
+    <!-- page content -->
+        <div class="right_col"  style="background-color:white;"role="main">
+          <h1 style="font-size:24px">Contactos</h1>
+
+      <!-- messages -->
+          {% if messages %}
+
+          {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger m-2 " role="alert">
+              {{ message }}
+            </div>
+            {% elif message.tags == 'success' %}
+            <div class="alert alert-success m-2" role="alert">
+              {{ message }}
+            </div>
+            {% else %}
+            <div class="alert alert-primary m-2" role="alert">
+              {{ message }}
+            </div>
+            {% endif %}
+          {% endfor %}
+  
+        {% endif %}
+
+      <!-- messages -->
+            <div class="row mb-4 m-0">
+              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'contactos_admin' %}">
+              <div class="col-md-12 col-sm-12 m-0 p-0">
+                <div class="col-md-2 col-sm-4 m-0 p-0">
+                  <span>Nombre</span>
+                  <div >
+                    <input name="nombre" id="nombre"  value="{{ filtros.nombre|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
+                  </div>
+                </div>
+                
+                <div class="col-md-2 col-sm-4 m-0 p-0">
+                    <span>Email</span>
+                    <div >
+                      <input name="email" id="email"  value="{{ filtros.email|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
+                    </div>
+                  </div>
+
+                <div class="col-md-2 col-sm-4 m-0 p-0">
+                    <span>Teléfono</span>
+                    <div>
+                      <input name="telefono" id="telefono"  value="{{ filtros.telefono|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-4 m-0 p-0">
+                    <span>Cargo</span>
+                    <div>
+                      <input name="cargo" id="cargo"  value="{{ filtros.cargo|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
+                    </div>
+                </div>
+                <!-- <div class="col-md-2 col-sm-4 ">
+                  <span class="count_top">País</span>
+                  <div class="count">
+                    <select name="pais" id="pais" class="form-select form-control-sm col-md-8 col-sm-4" aria-label="Default select example">
+                      <option selected value="" >--Seleccione uno--</option>
+                      {% for pais in paises %}
+                      <option value="{{ pais.id }}" {% if filtros.pais == pais.id|stringformat:"s" %}selected{% endif %}>{{pais.nombre}}</option>
+                     {% endfor %}
+                    </select>
+                  </div>
+                </div> -->
+
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Buscar</span>
+                  <div class=""><!-- Button trigger modal -->
+                    <button type="submit" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
+                      <i class="fa fa-search"></i>
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+              </form>
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Nuevo</span>
+                  <div class=""><!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#nuevo">
+                      <i class="fa fa-plus"></i>
+                      Nuevo
+                    </button>
+                    
+                   
+                    <!-- Modal -->
+                    <form method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                    <div class="modal fade" id="nuevo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Nuevo contacto</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            
+                            <div class="mb-3">
+                              <label for="nuevo_nombre" class="form-label">Nombre del contacto: </label>
+                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre del contacto" aria-describedby="basic-addon1">
+                            </div>
+
+                            <div class="mb-3">
+                              <label for="nuevo_email" class="form-label">Email del contacto: </label>
+                              <input name="nuevo_email" type="email" class="form-control" aria-label="Email del contacto" aria-describedby="basic-addon1">
+                            </div>
+
+                            <div class="mb-3">
+                              <label for="nuevo_telefono" class="form-label">Teléfono del contacto: </label>
+                              <input name="nuevo_telefono" type="tel" class="form-control" aria-label="Teléfono del contacto" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-3">
+                              <label for="nuevo_cargo" class="form-label">Cargo del contacto: </label>
+                              <input name="nuevo_cargo" type="text" class="form-control" aria-label="Cargo del contacto" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_user" class="form-label">Usuario: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_user" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for usuario in usuarios %}
+                                  <option value="{{usuario.id}}">{{usuario.username}}</option> 
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                              
+            
+                            </div>
+                              
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                  </div>
+                  
+                </div>
+                </div>
+            </div>
+       
+            <div class="row">
+              <div class="table-responsive m-2">
+              
+                  <table class="table bg-white rounded shadow-sm">
+                      <thead class="bg-light">
+                        <tr>
+                          <th scope="col">Acciones</th>
+                          <th scope="col">Nombre</th>
+                          <th scope="col">Email</th>
+                          <th scope="col">Tel</th>
+                          <th scope="col">Cargo</th>
+                          <th scope="col">Usuario</th>
+                        
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for contacto in pages %}
+                        
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              <!-- Botón de Editar -->
+                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ contacto.id }}">
+                                <i class="fa fa-edit"></i>
+                              </button>
+                          
+                              <!-- Modal de edición -->
+                              <form data-backdrop="false" method="post" action="{% url 'update_contacto' contacto.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div data-backdrop="false" class="modal fade" id="editarModal{{ contacto.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                  <div data-backdrop="false" class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Editar contacto</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                      <div data-backdrop="false" class="modal-body">
+                                        <div class="mb-3">
+                                          <label for="editar_nombre" class="form-label">Nombre del contacto:</label>
+                                          <input name="editar_nombre" value="{{ contacto.nombre }}" type="text" class="form-control" aria-label="Nombre del contacto" aria-describedby="basic-addon1">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="editar_email" class="form-label">Email del contacto:</label>
+                                            <input name="editar_email" value="{{ contacto.email }}" type="email" class="form-control" aria-label="Email del contacto" aria-describedby="basic-addon1">
+                                          </div>
+                                          <div class="mb-3">
+                                            <label for="editar_telefono" class="form-label">Nombre del contacto:</label>
+                                            <input name="editar_telefono" value="{{ contacto.telefono }}" type="tel" class="form-control" aria-label="Teléfono del contacto" aria-describedby="basic-addon1">
+                                          </div>
+                                          <div class="mb-3">
+                                            <label for="editar_cargo" class="form-label">Cargo del contacto:</label>
+                                            <input name="editar_cargo" value="{{ contacto.cargo }}" type="text" class="form-control" aria-label="Cargo del contacto" aria-describedby="basic-addon1">
+                                          </div>
+                                        <div class="mb-5">
+                                          <div class="form-group">
+                                            <label for="pais">Usuario</label>
+                                            <select class="form-control" id="editar_usuario" name="editar_usuario">
+                                              {% for usuario in usuarios %}
+                                              <option value="{{ usuario.id }}" {% if usuario.id == contacto.usuario.id %}selected{% endif %}>
+                                                {{ usuario.username }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </form>
+                          
+                              <!-- Botón de Eliminar -->
+                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_contacto' contacto.id %}">
+                                <i class="fa fa-trash-o text-danger"></i>
+                              </button>
+                            </div>
+                          </td>
+                          <td>{{ contacto.nombre }}</td>
+                          <td>{{ contacto.email }}</td>
+                          <td>{{ contacto.telefono }}</td>
+                          <td>{{ contacto.cargo }}</td>
+                          <td>{{ contacto.user }}</td>
+
+                          
+                        </tr>
+                       
+                    
+                        {% endfor %}
+                      </tbody>
+                  </table>
+              </div>  
+              <div class="app-table">
+              <div class="table-output">
+        <tbody id="table-body" class="table-body"> </tbody></div>
+            </div>
+          </div>
+           
+          
+              <!--
+                MOVIMIENTOS
+              
+              <div class="">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                  <h2> 
+                    Flotas
+                  </h2>
+               
+        
+              </div>
+                
+                <div class="list-group overflow-auto" style="max-height: 360px;">
+                 
+                  {% for movimiento in movimientos %}
+                    <div  class="list-group-item">
+                      <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{movimiento.nombre_movimiento}}</h5>
+                        <div>
+                          <form method="POST" class="d-inline" action="{% url 'exportar_movimiento' flota.id movimiento.id %}">
+                            {% csrf_token %}
+                          <button type="submit" class="w-10 btn btn-sm btn-success exportar-excel mx-2">
+                            <span class="material-icons-outlined">
+                              file_download
+                              </span>
+                              
+                          </button>
+                        </form>
+                        <form method="POST" class="d-inline eliminar-formulario" action="{% url 'delete_movimiento' flota.id movimiento.id %}" id="eliminarFormulario">
+                          {% csrf_token %}
+                        <button type="button" class="w-10 btn btn-sm btn-danger eliminar-elemento confirmar-eliminar mx-2" onclick="confirmarEliminar()">
+                          <span class="material-icons-outlined">
+                            delete
+                            </span>
+                            
+                        </button>
+                      </form>
+        
+                        </div>
+                      </div>
+                      <p class="mb-1">{{movimiento.tipo_movimiento}}</p>
+                      
+                      <p class="mb-1">Creación: {{movimiento.created}}</p>
+                      
+                    </div>
+                  {% endfor %}
+                  
+                </div>
+              -->
+              </div>
+          </div>
+        <!-- /page content -->
+        <script src="{% static 'js/swal.js' %}"></script>
+{% endblock %}

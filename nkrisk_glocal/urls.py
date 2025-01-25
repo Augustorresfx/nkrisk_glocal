@@ -16,23 +16,33 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from glocal import views
+from glocal.views import utils, matriz, broker, contacto
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.HomeView.as_view(), name='home'),
-    path('inicio/', views.InicioView.as_view(), name='inicio'),
+    path('', utils.HomeView.as_view(), name='home'),
+    path('inicio/', utils.InicioView.as_view(), name='inicio'),
     
     # MATRICES
-    path('administracion/matrices/', views.MatrizView.as_view(), name="matrices_admin"),
-    path('administracion/matrices/<int:matriz_id>/eliminar/', views.EliminarMatrizView.as_view(), name='delete_matriz'),
-    path('administracion/matrices/<int:matriz_id>/editar/', views.EditarMatrizView.as_view(), name='update_matriz'),
-
+    path('administracion/matrices/', matriz.MatrizView.as_view(), name="matrices_admin"),
+    path('administracion/matrices/<int:matriz_id>/eliminar/', matriz.EliminarMatrizView.as_view(), name='delete_matriz'),
+    path('administracion/matrices/<int:matriz_id>/editar/', matriz.EditarMatrizView.as_view(), name='update_matriz'),
+    
+    # BROKERS
+    path('administracion/brokers/', broker.BrokerView.as_view(), name="brokers_admin"),
+    path('administracion/brokers/<int:broker_id>/eliminar/', broker.EliminarBrokerView.as_view(), name='delete_broker'),
+    path('administracion/brokers/<int:broker_id>/editar/', broker.EditarBrokerView.as_view(), name='update_broker'),
+    
+    # CONTACTOS
+    path('administracion/contactos/', contacto.ContactoView.as_view(), name="contactos_admin"),
+    path('administracion/contactos/<int:contacto_id>/eliminar/', contacto.EliminarContactoView.as_view(), name='delete_contacto'),
+    path('administracion/contactos/<int:contacto_id>/editar/', contacto.EditarContactoView.as_view(), name='update_contacto'),
+    
     # CAMBIOS PENDIENTES
-    path('administracion/cambios_pendientes/', views.CambiosPendientesView.as_view(), name='cambios_pendientes'),
-    path('administracion/approve-change/<int:change_id>/', views.PendingChangeApprovalView.as_view(), name='approve_change'),
+    path('administracion/cambios_pendientes/', utils.CambiosPendientesView.as_view(), name='cambios_pendientes'),
+    path('administracion/approve-change/<int:change_id>/', utils.PendingChangeApprovalView.as_view(), name='approve_change'),
     
     # AUTENTICACIÓN
-    path('login/', views.SignInView.as_view(), name="login"),
-    path('logout/', views.SignOutView.as_view(), name="logout"), 
+    path('login/', utils.SignInView.as_view(), name="login"),
+    path('logout/', utils.SignOutView.as_view(), name="logout"), 
 ]
