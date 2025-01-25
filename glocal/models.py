@@ -15,13 +15,32 @@ class Pais(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class PendingChange(models.Model):
+    ACTION_CHOICES = [
+        ('edit', 'Edición'),
+        ('delete', 'Eliminación'),
+        ('create', 'Creación'),
+    ]
     
+    model_name = models.CharField(max_length=255)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    changes = models.JSONField()
+    submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(null=True)
+    action_type = models.CharField(max_length=10, choices=ACTION_CHOICES, default='edit')  # Campo adicional
+
+    def __str__(self):
+        return f"{self.model_name} - {self.object_id}"
+
 class Contacto(models.Model):
     nombre = models.CharField(max_length=100)
     email = models.EmailField()
     telefono = models.CharField(max_length=25, blank=True, null=True)
     cargo = models.CharField(max_length=100, blank=True, null=True)
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)  # Opcional, vincula con un User
+    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='contactos_modificados')
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='contactos')  # Opcional, vincula con un User
 
     def __str__(self):
         return self.nombre
@@ -66,24 +85,6 @@ class Contacto(models.Model):
 
         super().save(*args, **kwargs)  # Guardar el objeto normalmente
 
-class PendingChange(models.Model):
-    ACTION_CHOICES = [
-        ('edit', 'Edición'),
-        ('delete', 'Eliminación'),
-        ('create', 'Creación'),
-    ]
-    
-    model_name = models.CharField(max_length=255)
-    object_id = models.PositiveIntegerField(null=True, blank=True)
-    changes = models.JSONField()
-    submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    submitted_at = models.DateTimeField(auto_now_add=True)
-    approved = models.BooleanField(null=True)
-    action_type = models.CharField(max_length=10, choices=ACTION_CHOICES, default='edit')  # Campo adicional
-
-    def __str__(self):
-        return f"{self.model_name} - {self.object_id}"
-
 class Matriz(models.Model):
     nombre = models.CharField(max_length=100)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
@@ -91,7 +92,10 @@ class Matriz(models.Model):
     modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if self.pk:  # Solo para objetos existentes
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
             original = self.__class__.objects.get(pk=self.pk)
             changes = {}
 

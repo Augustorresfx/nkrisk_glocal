@@ -113,7 +113,7 @@ class EditarBrokerView(View):
 
             broker.save()  # Guardar los cambios directamente
             messages.success(request, 'Los cambios se han aplicado directamente.')
-            return redirect('matrices_admin')
+            return redirect('brokers_admin')
 
         # Para usuarios no superuser, registrar los cambios pendientes
         changes = {}

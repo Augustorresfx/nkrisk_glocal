@@ -56,54 +56,74 @@ class CambiosPendientesView(View):
 
         return render(request, 'administracion/cambios_admin.html', context=context)
 
-# Utils
 @method_decorator(login_required, name='dispatch')
 class PendingChangeApprovalView(View):
-    def post(self, request, change_id):
+    def post(self, request, *args, **kwargs):
+        change_id = kwargs.get("change_id")
         change = get_object_or_404(PendingChange, id=change_id)
         usuario = change.submitted_by
-        action = request.POST.get("action")
+        action = request.POST.get("action")  # Puede ser "approve" o "reject"
 
         if action == "approve":
             # Obtener el modelo dinámicamente
             model = apps.get_model(app_label='glocal', model_name=change.model_name)
-            instance = model.objects.get(pk=change.object_id)
 
-            for field, values in change.changes.items():
-                if "new" not in values:
-                    messages.error(request, f"Error: No se encontró el valor 'nuevo' para el campo {field}")
-                    return redirect('cambios_pendientes')
+            # Manejar según el tipo de acción
+            if change.action_type == "create":
+                # Crear una nueva instancia del modelo
+                instance = model(**{field: values["new"] for field, values in change.changes.items()})
+                print(instance)
+                instance.save()
+                
+                print(instance)
+                print(instance.modified_by)
+                print(instance.pais)
+                instance.modified_by = usuario  # Registrar quién realizó el cambio (sino es null)
+                instance.save(track_changes=False)  # Evitar registrar PendingChange
+                
+                
 
-                # Detectar dinámicamente si el campo es un ForeignKey
-                field_object = instance._meta.get_field(field)
-                if isinstance(field_object, models.ForeignKey):
-                    # Obtener el modelo relacionado
-                    related_model = field_object.related_model
-                    # Obtener la instancia del modelo relacionado
-                    related_instance = get_object_or_404(related_model, id=values["new"]["id"])
-                    setattr(instance, field, related_instance)
-                elif field == "modified_by" or field == "submitted_by":
-                    setattr(instance, field, usuario)
-                else:
-                    setattr(instance, field, values["new"]["id"] if isinstance(values["new"], dict) else values["new"])
+            elif change.action_type == "edit":
+                # Buscar la instancia existente y aplicar los cambios
+                try:
+                    instance = model.objects.get(pk=change.object_id)
+                except model.DoesNotExist:
+                    messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
+                    return redirect("cambios_pendientes")
 
-            # Guardar la instancia actualizada
-            instance.save()
+                # Actualizar los campos con los valores nuevos
+                for field, values in change.changes.items():
+                    if "new" in values:
+                        setattr(instance, field, values["new"])
+                    else:
+                        messages.error(request, f"Error: No se encontró el valor 'new' para el campo {field}.")
+                        return redirect("cambios_pendientes")
+                instance.save(track_changes=False)  # Evitar registrar PendingChange
 
-            # Actualizar el estado del cambio pendiente
-            change.approved = True
+            elif change.action_type == "delete":
+                # Buscar y eliminar la instancia existente
+                try:
+                    instance = model.objects.get(pk=change.object_id)
+                    instance.delete()
+                except model.DoesNotExist:
+                    messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
+                    return redirect("cambios_pendientes")
+
+            # Marcar el cambio como aprobado y eliminarlo
+            change.is_approved = True
             change.save()
-
-            messages.success(request, "Cambio aprobado exitosamente.")
-            return redirect('cambios_pendientes')
+            change.delete()
+            messages.success(request, f"Cambio aprobado exitosamente por {request.user}.")
 
         elif action == "reject":
-            # Si se rechaza, actualizar el estado del cambio
-            change.approved = False
+            # Si se rechaza, marcar como rechazado y eliminar el cambio pendiente
+            change.is_approved = False
             change.save()
+            change.delete()  # Eliminar el cambio de la lista de pendientes
             messages.info(request, "Cambio rechazado.")
 
-        return redirect('cambios_pendientes')
+        return redirect("cambios_pendientes")
+
 
 # Autenticación
 class SignOutView(View):

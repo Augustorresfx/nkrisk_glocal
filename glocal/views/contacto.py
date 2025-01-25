@@ -112,7 +112,7 @@ class EditarContactoView(View):
         email = request.POST.get('editar_email')
         telefono = request.POST.get('editar_telefono')
         cargo = request.POST.get('editar_cargo')
-        user_id = request.POST.get('editar_user')
+        user_id = request.POST.get('editar_usuario')
         nombre = request.POST.get('editar_nombre')
 
         user = request.user

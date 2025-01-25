@@ -8,7 +8,9 @@ from collections import defaultdict
 from decimal import Decimal
 
 from .models import Movimiento, VehiculoFlota, VehiculoInfoAuto, Flota, PrecioAnual, Localidad, TarifaFlota
+
 import calendar
+
 def get_tarifas():
     # Consultar todas las tarifas necesarias
     tarifas = TarifaFlota.objects.all()
