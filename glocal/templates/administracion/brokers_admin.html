@@ -1,6 +1,49 @@
 {% extends 'index_master.html' %}
 {% load static %}
 {% block content %}
+<style>
+  /* Estilo base para el select */
+  .multi-select-pillbox {
+    width: 36em; /* Límite de ancho inicial para pantallas grandes */
+    padding: 0.5em; /* Espaciado interno para mejor apariencia */
+    box-sizing: border-box; /* Asegura que el padding no desborde el tamaño */
+  }
+  
+  /* Pantallas medianas (menos de 768px) */
+  @media (max-width: 768px) {
+    .multi-select-pillbox {
+      width: 28em; /* Ancho reducido para pantallas medianas */
+    }
+  }
+  
+  /* Pantallas pequeñas (menos de 400px) */
+  @media (max-width: 400px) {
+    .multi-select-pillbox {
+      width: 15em; /* Ancho aún más reducido para pantallas pequeñas */
+    }
+  }
+
+    /* Estilo base para el select */
+    .multi-select-pillbox-2 {
+    width: 36em; /* Límite de ancho inicial para pantallas grandes */
+    padding: 0.5em; /* Espaciado interno para mejor apariencia */
+    box-sizing: border-box; /* Asegura que el padding no desborde el tamaño */
+  }
+  
+  /* Pantallas medianas (menos de 768px) */
+  @media (max-width: 768px) {
+    .multi-select-pillbox-2 {
+      width: 28em; /* Ancho reducido para pantallas medianas */
+    }
+  }
+  
+  /* Pantallas pequeñas (menos de 400px) */
+  @media (max-width: 400px) {
+    .multi-select-pillbox-2 {
+      width: 15em; /* Ancho aún más reducido para pantallas pequeñas */
+    }
+  }
+  </style>
 
     <!-- page content -->
         <div class="right_col"  style="background-color:white;"role="main">
@@ -69,14 +112,14 @@
                     </button>
                     
                    
-                    <!-- Modal -->
+                    <!-- Modal creación -->
                     <form method="post" enctype="multipart/form-data">
                       {% csrf_token %}
                     <div class="modal fade" id="nuevo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog" role="document">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Nueva matriz</h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Nuevo broker</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                             </button>
@@ -84,8 +127,12 @@
                           <div class="modal-body">
                             
                             <div class="mb-3">
-                              <label for="nuevo_nombre" class="form-label">Nombre de la matriz: </label>
-                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre de la matriz" aria-describedby="basic-addon1">
+                              <label for="nuevo_nombre" class="form-label">Nombre del broker: </label>
+                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre del broker" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-3">
+                              <label for="nuevo_logo" class="form-label">Logo del broker: </label>
+                              <input name="nuevo_logo" type="file" class="form-control" aria-label="Logo del broker" aria-describedby="basic-addon1">
                             </div>
                             <div class="mb-5">
                               <span class="count_top">
@@ -101,14 +148,50 @@
                                 </select>
                               </div>
                             </div>
-                              
+                            <div class="mb-3">
+                              <label for="nuevo_domicilio" class="form-label">Oficina del broker: </label>
+                              <input name="nuevo_domicilio" type="text" class="form-control" aria-label="Oficina del broker" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-3">
+                              <label for="nuevo_web" class="form-label">URL web del broker: </label>
+                              <input name="nuevo_web" type="text" class="form-control" aria-label="URL web del broker" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_matriz" class="form-label">Matriz: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_matriz" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for matriz in matrices %}
+                                  <option value="{{matriz.id}}">{{matriz.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+
                               <div class="mb-3">
                                 <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
                               <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
                               <input type="hidden" name="nuevo_activo" value="False">
                               <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" >
-
                               </div>
+
+                              <div class="mb-5">
+                                <span class="count_top">
+                                  <label for="nuevo_contactos" class="form-label">Contactos: </label></span>                              
+                                <span class="count_top"></span>
+                                <div class="count">
+                                  
+                                  <select name="nuevo_contacto" id="multi_select_propio_2" class="multi-select-pillbox" multiple="multiple">
+                                    {% for contacto in contactos %}
+                                    <option value="{{contacto.id}}">{{contacto.nombre}}</option>
+                                   {% endfor %}
+                                </select>
+                                </div>
+                              </div>
+
                               </div>
                               
                           <div class="modal-footer">
@@ -133,53 +216,98 @@
                         <tr>
                           <th scope="col">Acciones</th>
                           <th scope="col">Nombre</th>
+                          <th scope="col">Logo</th>
                           <th scope="col">País</th>
+                          <th scope="col">Domicilio</th>
+                          <th scope="col">Url web</th>
+                          <th scope="col">Matriz</th>
                           <th scope="col">Activo</th>
-                        
+                          <th scope="col">Contactos</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {% for matriz in pages %}
+                        {% for broker in pages %}
                         
                         <tr>
                           <td>
                             <div class="d-flex align-items-center">
                               <!-- Botón de Editar -->
-                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ matriz.id }}">
+                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ broker.id }}">
                                 <i class="fa fa-edit"></i>
                               </button>
                           
                               <!-- Modal de edición -->
-                              <form data-backdrop="false" method="post" action="{% url 'update_matriz' matriz.id %}" enctype="multipart/form-data">
+                              <form data-backdrop="false" method="post" action="{% url 'update_broker' broker.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div data-backdrop="false" class="modal fade" id="editarModal{{ matriz.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div data-backdrop="false" class="modal fade" id="editarModal{{ broker.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
                                   <div data-backdrop="false" class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Editar matriz</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Editar broker</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                           <span aria-hidden="true">&times;</span>
                                         </button>
                                       </div>
                                       <div data-backdrop="false" class="modal-body">
                                         <div class="mb-3">
-                                          <label for="editar_nombre" class="form-label">Nombre de la matriz:</label>
-                                          <input name="editar_nombre" value="{{ matriz.nombre }}" type="text" class="form-control" aria-label="Nombre de la matriz" aria-describedby="basic-addon1">
+                                          <label for="editar_nombre" class="form-label">Nombre del broker:</label>
+                                          <input name="editar_nombre" value="{{ broker.nombre }}" type="text" class="form-control" aria-label="Nombre del broker" aria-describedby="basic-addon1">
+                                        </div>
+                                        <div class="mb-3">
+                                          <label for="editar_logo" class="form-label">Logo del broker:</label>
+                                          <input name="editar_logo" type="file" class="form-control" aria-label="Logo del broker" aria-describedby="basic-addon1">
+                                          <!-- Si hay un logo, mostrar la imagen actual -->
+                                          {% if broker.logo %}
+                                            <img src="{{ broker.logo.url }}" alt="Logo actual" style="max-width: 150px; margin-top: 10px;">
+                                          {% endif %}
                                         </div>
                                         <div class="mb-5">
                                           <div class="form-group">
                                             <label for="pais">País</label>
                                             <select class="form-control" id="editar_pais" name="editar_pais">
                                               {% for pais in paises %}
-                                              <option value="{{ pais.id }}" {% if pais.id == matriz.pais.id %}selected{% endif %}>
+                                              <option value="{{ pais.id }}" {% if pais.id == broker.pais.id %}selected{% endif %}>
                                                 {{ pais.nombre }}
                                               </option>
                                               {% endfor %}
                                             </select>
                                           </div>
                                           <div class="form-group">
+                                            <label for="editar_matriz">Matriz</label>
+                                            <select class="form-control" id="editar_matriz" name="editar_matriz">
+                                              {% for matriz in matrices %}
+                                              <option value="{{ matriz.id }}" {% if matriz.id == broker.matriz.id %}selected{% endif %}>
+                                                {{ matriz.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="mb-3">
+                                            <label for="editar_domicilio" class="form-label">Oficina del broker:</label>
+                                            <input name="editar_domicilio" value="{{ broker.domicilio_oficina }}" type="text" class="form-control" aria-label="Oficina del broker" aria-describedby="basic-addon1">
+                                          </div>
+                                          <div class="mb-3">
+                                            <label for="editar_web" class="form-label">Url web del broker:</label>
+                                            <input name="editar_web" value="{{ broker.url_web }}" type="text" class="form-control" aria-label="Url web del broker" aria-describedby="basic-addon1">
+                                          </div>
+                                          <div class="form-group">
                                             <label for="activo">Activo</label>
-                                            <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if matriz.activo %}checked{% endif %}>
+                                            <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if broker.activo %}checked{% endif %}>
+                                          </div>
+                                          <div class="mb-5" style="z-index: 2500;">
+                                            <span class="count_top">
+                                              <label for="editar_contacto" class="form-label">Contactos: </label></span>                              
+                                            <span class="count_top"></span>
+                                            <div class="count">
+                                              
+                                              <select name="editar_contacto" id="multi_select_edicion" class="multi-select-pillbox-2" multiple="multiple">
+                                                {% for contacto in contactos %}
+                                                    <option value="{{ contacto.id }}" {% if contacto in broker.contactos.all %}selected{% endif %}>
+                                                        {{ contacto.nombre }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
@@ -193,14 +321,20 @@
                               </form>
                           
                               <!-- Botón de Eliminar -->
-                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_matriz' matriz.id %}">
+                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_broker' broker.id %}">
                                 <i class="fa fa-trash-o text-danger"></i>
                               </button>
                             </div>
                           </td>
-                          <td>{{ matriz.nombre }}</td>
-                          <td>{{ matriz.pais }}</td>
-                          {% if matriz.activo %}
+                          <td>{{ broker.nombre }}</td>
+                          <td>
+                            <img src="{{ broker.logo.url }}" alt="{{ broker.nombre }}" style="max-width: 100px; height: auto;">
+                          </td>
+                          <td>{{ broker.pais }}</td>
+                          <td>{{ broker.domicilio_oficina }}</td>
+                          <td>{{ broker.url_web }}</td>
+                          <td>{{ broker.matriz.nombre }}</td>
+                          {% if broker.activo %}
                           <td class="green">Si</td>
   
                           {% else %}
@@ -208,6 +342,13 @@
   
                           {% endif %}
                           
+                          <td>
+                            {% for contacto in broker.contactos.all %}
+                              {{ contacto.nombre }}<br>
+                            {% empty %}
+                              No hay contactos asignados
+                            {% endfor %}
+                          </td>
         
 
                           

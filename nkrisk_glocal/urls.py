@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from glocal.views import utils, matriz, broker, contacto
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -46,3 +48,7 @@ urlpatterns = [
     path('login/', utils.SignInView.as_view(), name="login"),
     path('logout/', utils.SignOutView.as_view(), name="logout"), 
 ]
+
+# Esto solo se usa en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

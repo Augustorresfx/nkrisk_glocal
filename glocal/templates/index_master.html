@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="images/favicon.ico" type="image/ico" />
+    <link rel="icon" href="images/favicon.ico" type="image/ico" />
 
     <title></title>
 
@@ -209,6 +209,27 @@
     <script src="{% static '/FrWork/admin_lte/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js' %}"></script>
     <!-- Custom Theme Scripts -->
     <script src="{% static '/FrWork/admin_lte/build/js/custom.min.js' %}"></script>
-	
+    <!-- Select 2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+      $(document).ready(function() {
+          // Para cada modal de edición (usando id dinámico de cada broker)
+          $('[id^="editarModal"]').on('shown.bs.modal', function () {
+              // Inicializamos select2 dentro del modal específico
+              $(this).find('.multi-select-pillbox-2').select2({
+                  dropdownParent: $(this)  // Asegura que el dropdown esté dentro del modal
+              });
+          });
+
+          // Para el modal de creación (este es estático)
+          $('#nuevo').on('shown.bs.modal', function () {
+              $('#multi_select_propio_2').select2({
+                  dropdownParent: $(this)  // Asegura que el dropdown esté dentro del modal
+              });
+          });
+      });
+
+
+  </script>
   </body>
 </html>
