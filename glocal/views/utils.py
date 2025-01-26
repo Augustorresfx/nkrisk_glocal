@@ -70,35 +70,51 @@ class PendingChangeApprovalView(View):
 
             # Manejar según el tipo de acción
             if change.action_type == "create":
-                # Crear una nueva instancia del modelo
-                instance = model(**{field: values["new"] for field, values in change.changes.items()})
+                m2m_fields = {}  # Almacenar campos ManyToMany para asignarlos después
+                regular_fields = {}
 
+                for field, values in change.changes.items():
+                    if isinstance(model._meta.get_field(field), models.ManyToManyField):
+                        m2m_fields[field] = values["new"]  # Guardar los valores de ManyToManyField
+                    else:
+                        regular_fields[field] = values["new"]
+
+                # Crear instancia con campos regulares
+                instance = model(**regular_fields)
                 instance.save()
 
-                instance.modified_by = usuario  # Registrar quién realizó el cambio (sino es null)
+                # Asignar relaciones ManyToMany
+                for field, values in m2m_fields.items():
+                    m2m_manager = getattr(instance, field)
+                    m2m_manager.set(values)  # Usar set() para asignar los valores correctamente
+
+                # Registrar quién realizó el cambio
+                instance.modified_by = usuario
                 instance.save(track_changes=False)  # Evitar registrar PendingChange
-                
-                
 
             elif change.action_type == "edit":
-                # Buscar la instancia existente y aplicar los cambios
                 try:
                     instance = model.objects.get(pk=change.object_id)
                 except model.DoesNotExist:
                     messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
                     return redirect("cambios_pendientes")
 
-                # Actualizar los campos con los valores nuevos
+                m2m_fields = {}
                 for field, values in change.changes.items():
                     if "new" in values:
-                        setattr(instance, field, values["new"])
-                    else:
-                        messages.error(request, f"Error: No se encontró el valor 'new' para el campo {field}.")
-                        return redirect("cambios_pendientes")
-                instance.save(track_changes=False)  # Evitar registrar PendingChange
+                        if isinstance(model._meta.get_field(field), models.ManyToManyField):
+                            m2m_fields[field] = values["new"]
+                        else:
+                            setattr(instance, field, values["new"])
+                
+                instance.save(track_changes=False)  # Guardar cambios regulares
+
+                # Actualizar relaciones ManyToMany
+                for field, values in m2m_fields.items():
+                    m2m_manager = getattr(instance, field)
+                    m2m_manager.set(values)
 
             elif change.action_type == "delete":
-                # Buscar y eliminar la instancia existente
                 try:
                     instance = model.objects.get(pk=change.object_id)
                     instance.delete()
@@ -106,20 +122,175 @@ class PendingChangeApprovalView(View):
                     messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
                     return redirect("cambios_pendientes")
 
-            # Marcar el cambio como aprobado y eliminarlo
+            # Marcar el cambio como aprobado
             change.is_approved = True
             change.save()
+
+            # Eliminar el cambio de la lista de pendientes después de procesarlo
             change.delete()
+
             messages.success(request, f"Cambio aprobado exitosamente por {request.user}.")
 
         elif action == "reject":
             # Si se rechaza, marcar como rechazado y eliminar el cambio pendiente
             change.is_approved = False
             change.save()
-            change.delete()  # Eliminar el cambio de la lista de pendientes
+
+            # Eliminar el cambio de la lista de pendientes
+            change.delete()
             messages.info(request, "Cambio rechazado.")
 
         return redirect("cambios_pendientes")
+# Aprobar 2
+
+# @method_decorator(login_required, name='dispatch')
+# class PendingChangeApprovalView(View):
+#     def post(self, request, *args, **kwargs):
+#         change_id = kwargs.get("change_id")
+#         change = get_object_or_404(PendingChange, id=change_id)
+#         usuario = change.submitted_by
+#         action = request.POST.get("action")  # Puede ser "approve" o "reject"
+
+#         if action == "approve":
+#             # Obtener el modelo dinámicamente
+#             model = apps.get_model(app_label='glocal', model_name=change.model_name)
+
+#             # Manejar según el tipo de acción
+#             if change.action_type == "create":
+#                 # Crear una nueva instancia del modelo sin incluir campos ManyToMany
+#                 m2m_fields = {}  # Almacenar campos ManyToMany para asignarlos después
+#                 regular_fields = {}
+
+#                 for field, values in change.changes.items():
+#                     if isinstance(model._meta.get_field(field), models.ManyToManyField):
+#                         m2m_fields[field] = values["new"]  # Guardar los valores de ManyToManyField
+#                     else:
+#                         regular_fields[field] = values["new"]
+
+#                 # Crear instancia con campos regulares
+#                 instance = model(**regular_fields)
+#                 instance.save()
+
+#                 # Asignar relaciones ManyToMany
+#                 for field, values in m2m_fields.items():
+#                     m2m_manager = getattr(instance, field)
+#                     m2m_manager.set(values)  # Usar set() para asignar los valores correctamente
+
+#                 # Registrar quién realizó el cambio
+#                 instance.modified_by = usuario
+#                 instance.save(track_changes=False)  # Evitar registrar PendingChange
+
+#             elif change.action_type == "edit":
+#                 try:
+#                     instance = model.objects.get(pk=change.object_id)
+#                 except model.DoesNotExist:
+#                     messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
+#                     return redirect("cambios_pendientes")
+
+#                 m2m_fields = {}
+#                 for field, values in change.changes.items():
+#                     if "new" in values:
+#                         if isinstance(model._meta.get_field(field), models.ManyToManyField):
+#                             m2m_fields[field] = values["new"]
+#                         else:
+#                             setattr(instance, field, values["new"])
+                
+#                 instance.save(track_changes=False)  # Guardar cambios regulares
+
+#                 # Actualizar relaciones ManyToMany
+#                 for field, values in m2m_fields.items():
+#                     m2m_manager = getattr(instance, field)
+#                     m2m_manager.set(values)
+
+#             elif change.action_type == "delete":
+#                 try:
+#                     instance = model.objects.get(pk=change.object_id)
+#                     instance.delete()
+#                 except model.DoesNotExist:
+#                     messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
+#                     return redirect("cambios_pendientes")
+
+#             # Marcar el cambio como aprobado y eliminarlo
+#             change.is_approved = True
+#             change.save()
+#             change.delete()
+#             messages.success(request, f"Cambio aprobado exitosamente por {request.user}.")
+
+#         elif action == "reject":
+#             # Si se rechaza, marcar como rechazado y eliminar el cambio pendiente
+#             change.is_approved = False
+#             change.save()
+#             change.delete()  # Eliminar el cambio de la lista de pendientes
+#             messages.info(request, "Cambio rechazado.")
+
+#         return redirect("cambios_pendientes")
+
+# Aprobar 1
+
+# @method_decorator(login_required, name='dispatch')
+# class PendingChangeApprovalView(View):
+#     def post(self, request, *args, **kwargs):
+#         change_id = kwargs.get("change_id")
+#         change = get_object_or_404(PendingChange, id=change_id)
+#         usuario = change.submitted_by
+#         action = request.POST.get("action")  # Puede ser "approve" o "reject"
+
+#         if action == "approve":
+#             # Obtener el modelo dinámicamente
+#             model = apps.get_model(app_label='glocal', model_name=change.model_name)
+
+#             # Manejar según el tipo de acción
+#             if change.action_type == "create":
+#                 # Crear una nueva instancia del modelo
+#                 instance = model(**{field: values["new"] for field, values in change.changes.items()})
+
+#                 instance.save()
+
+#                 instance.modified_by = usuario  # Registrar quién realizó el cambio (sino es null)
+#                 instance.save(track_changes=False)  # Evitar registrar PendingChange
+                
+                
+
+#             elif change.action_type == "edit":
+#                 # Buscar la instancia existente y aplicar los cambios
+#                 try:
+#                     instance = model.objects.get(pk=change.object_id)
+#                 except model.DoesNotExist:
+#                     messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
+#                     return redirect("cambios_pendientes")
+
+#                 # Actualizar los campos con los valores nuevos
+#                 for field, values in change.changes.items():
+#                     if "new" in values:
+#                         setattr(instance, field, values["new"])
+#                     else:
+#                         messages.error(request, f"Error: No se encontró el valor 'new' para el campo {field}.")
+#                         return redirect("cambios_pendientes")
+#                 instance.save(track_changes=False)  # Evitar registrar PendingChange
+
+#             elif change.action_type == "delete":
+#                 # Buscar y eliminar la instancia existente
+#                 try:
+#                     instance = model.objects.get(pk=change.object_id)
+#                     instance.delete()
+#                 except model.DoesNotExist:
+#                     messages.error(request, f"Error: No se encontró la instancia con ID {change.object_id}.")
+#                     return redirect("cambios_pendientes")
+
+#             # Marcar el cambio como aprobado y eliminarlo
+#             change.is_approved = True
+#             change.save()
+#             change.delete()
+#             messages.success(request, f"Cambio aprobado exitosamente por {request.user}.")
+
+#         elif action == "reject":
+#             # Si se rechaza, marcar como rechazado y eliminar el cambio pendiente
+#             change.is_approved = False
+#             change.save()
+#             change.delete()  # Eliminar el cambio de la lista de pendientes
+#             messages.info(request, "Cambio rechazado.")
+
+#         return redirect("cambios_pendientes")
 
 
 # Autenticación

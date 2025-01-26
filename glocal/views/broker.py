@@ -54,7 +54,72 @@ class BrokerView(View):
             }
         }
         return render(request, 'administracion/brokers_admin.html', context)
-    
+    def post(self, request, *args, **kwargs):
+        # Obtener datos del formulario
+        nombre = request.POST.get('nuevo_nombre')
+        logo = request.FILES.get('nuevo_logo')
+        domicilio = request.POST.get('nuevo_domicilio')
+        web = request.POST.get('nuevo_web')
+        matriz_id = request.POST.get('nuevo_matriz')
+        pais_id = request.POST.get('nuevo_pais')
+        activo = request.POST.get('nuevo_activo')
+        contactos_ids = request.POST.getlist('nuevo_contacto') 
+        print(f"Domicilio recibido: {domicilio}")
+        if activo == "on":
+            activo = True
+        else:
+            activo = False
+        # Obtener objetos relacionados
+        pais = get_object_or_404(Pais, id=pais_id)
+        matriz = get_object_or_404(Matriz, id=matriz_id)
+        contactos = get_list_or_404(Contacto, id__in=contactos_ids)
+        user = request.user
+        # Crear una solicitud de creación pendiente
+        changes = {
+            'nombre': {'new': nombre},
+            'logo': {'new': logo.name if logo else None},  # Guardar el nombre del archivo
+            
+            'domicilio_oficina': {'new': domicilio},
+            'url_web': {'new': web},
+            'pais_id': {'new': pais.id},
+            'matriz_id': {'new': matriz.id},
+            'activo': {'new': activo},
+            'contactos': {'new': [c.id for c in contactos]},  # IDs de los contactos seleccionados
+        }
+
+        if user.is_superuser:
+            try:
+                # Crear el objeto Broker directamente si el usuario es superusuario
+                broker = Broker.objects.create(
+                    nombre=nombre,
+                    logo=logo,
+                    domicilio_oficina=domicilio,
+                    url_web=web,
+                    pais=pais,
+                    matriz=matriz,
+                    activo=activo,
+                    modified_by = user,
+                )
+                broker.contactos.set(contactos)  # Relación muchos a muchos
+                messages.success(request, 'Se creó un nuevo elemento de forma exitosas.')
+            except Exception as e:
+                messages.error(request, f'Error: No se pudo crear el elemento. Detalles: {str(e)}')
+ 
+        else:
+            try:
+                PendingChange.objects.create(
+                    model_name='broker',
+                    object_id=None,  # No existe aún
+                    changes=changes,
+                    submitted_by=user,
+                    action_type='create',
+                )
+                messages.success(request, 'Solicitud de creación enviada para aprobación.')
+            except Exception as e:
+                messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
+
+        return HttpResponseRedirect(request.path_info)
+
 @method_decorator(login_required, name='dispatch')
 class EditarBrokerView(View):
     def post(self, request, broker_id):
@@ -133,15 +198,14 @@ class EditarBrokerView(View):
             # Comparar contactos, actualizando la relación ManyToMany
             if set(broker.contactos.all()) != set(contactos):
                 changes['contactos'] = {
-                    'old': [contacto.nombre for contacto in broker.contactos.all()],
-                    'new': [contacto.nombre for contacto in contactos]
+                    'old': [contacto.id for contacto in broker.contactos.all()],
+                    'new': [contacto.id for contacto in contactos]
                 }
-                broker.contactos.set(contactos)  # Actualiza los contactos asociados al broker
 
             if changes:
                 try:
                     PendingChange.objects.create(
-                        model_name='broker',
+                        model_name='broker',    
                         object_id=broker.id,
                         changes=changes,
                         submitted_by=user,
