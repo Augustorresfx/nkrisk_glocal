@@ -239,7 +239,7 @@
                               <!-- Modal de edición -->
                               <form data-backdrop="false" method="post" action="{% url 'update_broker' broker.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div data-backdrop="false" class="modal fade" id="editarModal{{ broker.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                                <div data-backdrop="false" class="modal fade" id="editarModal{{ broker.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
                                   <div data-backdrop="false" class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
@@ -294,7 +294,7 @@
                                             <label for="activo">Activo</label>
                                             <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if broker.activo %}checked{% endif %}>
                                           </div>
-                                          <div class="mb-5" style="z-index: 2500;">
+                                          <div class="mb-5">
                                             <span class="count_top">
                                               <label for="editar_contacto" class="form-label">Contactos: </label></span>                              
                                             <span class="count_top"></span>
