@@ -5,7 +5,7 @@
     <!-- page content -->
         <div class="right_col"  style="background-color:white;"role="main">
           <h1 style="font-size:24px">Contactos</h1>
-          <div class="moveModalHere"></div>
+
       <!-- messages -->
           {% if messages %}
 
@@ -152,29 +152,9 @@
                 </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#testModal">
-              Abrir Modal
-            </button>
-            <div class="modal fade" id="testModal" tabindex="-1" role="dialog" aria-labelledby="testModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="testModalLabel">Modal de Prueba</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    Este es un modal de prueba.
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+       
             <div class="row">
-              <div class="table-responsive m-2">
+              <div class="table" style="overflow: auto;">
               
                   <table class="table bg-white rounded shadow-sm">
                       <thead class="bg-light">
@@ -211,7 +191,7 @@
                                           <span aria-hidden="true">&times;</span>
                                         </button>
                                       </div>
-                                      <div data-backdrop="false" class="modalBodyToMove">
+                                      <div data-backdrop="false" class="modal-body">
                                         <div class="mb-3">
                                           <label for="editar_nombre" class="form-label">Nombre del contacto:</label>
                                           <input name="editar_nombre" value="{{ contacto.nombre }}" type="text" class="form-control" aria-label="Nombre del contacto" aria-describedby="basic-addon1">
@@ -329,20 +309,5 @@
               </div>
           </div>
         <!-- /page content -->
-        <script>
-          /* MOVE modal body: 
-              All HTML code with the class modalBodyToMove  (modal created in sql2html)
-              must mouve in div identifier moveModalHere (div in the generic header)
-              to move them out of everything (specially the HTML tables)
-          */
-          var elements = document.querySelectorAll('.modalBodyToMove');
-          var classCount = elements.length;
-          console.log("Number of class modalBodyToMove: "+classCount);
-          if (classCount > 0){
-              for(var i = 0; i < elements.length; i++) {
-                  document.getElementById('moveModalHere').appendChild(  elements[i] )
-              }
-          }
-          </script>
         <script src="{% static 'js/swal.js' %}"></script>
 {% endblock %}
