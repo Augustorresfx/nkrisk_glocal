@@ -180,10 +180,10 @@
                               </button>
                           
                               <!-- Modal de edición -->
-                              <form data-backdrop="false" method="post" action="{% url 'update_contacto' contacto.id %}" enctype="multipart/form-data">
+                              <form method="post" action="{% url 'update_contacto' contacto.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div data-backdrop="false" class="modal fade" id="editarModal{{ contacto.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                  <div data-backdrop="false" class="modal-dialog" role="document">
+                                <div class="modal fade" id="editarModal{{ contacto.id }}" style="z-index: 2000;" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
                                         <h5 class="modal-title" id="exampleModalLabel">Editar contacto</h5>
@@ -191,7 +191,7 @@
                                           <span aria-hidden="true">&times;</span>
                                         </button>
                                       </div>
-                                      <div data-backdrop="false" class="modal-body">
+                                      <div class="modal-body">
                                         <div class="mb-3">
                                           <label for="editar_nombre" class="form-label">Nombre del contacto:</label>
                                           <input name="editar_nombre" value="{{ contacto.nombre }}" type="text" class="form-control" aria-label="Nombre del contacto" aria-describedby="basic-addon1">
