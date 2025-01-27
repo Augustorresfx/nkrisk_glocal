@@ -41,7 +41,7 @@ class InicioView(View):
 class CambiosPendientesView(View):
     def get(self, request, *args, **kwargs):
         changes = PendingChange.objects.filter(approved__isnull=True)
-        print(changes)
+        print("Cambio en la vista: ", changes)
         for change in changes:
             change.is_deletion = change.action_type == 'delete'  # Agrega un atributo al objeto
 
@@ -61,6 +61,7 @@ class PendingChangeApprovalView(View):
     def post(self, request, *args, **kwargs):
         change_id = kwargs.get("change_id")
         change = get_object_or_404(PendingChange, id=change_id)
+        print("Cambio pendiente: ", change.changes)
         usuario = change.submitted_by
         action = request.POST.get("action")  # Puede ser "approve" o "reject"
 

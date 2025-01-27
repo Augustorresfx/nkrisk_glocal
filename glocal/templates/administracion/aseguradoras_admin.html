@@ -47,7 +47,7 @@
 
     <!-- page content -->
         <div class="right_col"  style="background-color:white;"role="main">
-          <h1 style="font-size:24px">Brokers</h1>
+          <h1 style="font-size:24px">Aseguradoras</h1>
 
       <!-- messages -->
           {% if messages %}
@@ -72,7 +72,7 @@
 
       <!-- messages -->
             <div class="row mb-4 m-0">
-              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'brokers_admin' %}">
+              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'matrices_admin' %}">
               <div class="col-md-12 col-sm-12 m-0 p-0">
                 <div class="col-md-2 col-sm-4 m-0 p-0">
                   <span>Nombre</span>
@@ -119,7 +119,7 @@
                       <div class="modal-dialog" role="document">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Nuevo broker</h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Nueva aseguradora</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                             </button>
@@ -127,12 +127,12 @@
                           <div class="modal-body">
                             
                             <div class="mb-3">
-                              <label for="nuevo_nombre" class="form-label">Nombre del broker: </label>
-                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre del broker" aria-describedby="basic-addon1">
+                              <label for="nuevo_nombre" class="form-label">Nombre de la aseguradora: </label>
+                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre de la aseguradora" aria-describedby="basic-addon1">
                             </div>
                             <div class="mb-3">
-                              <label for="nuevo_logo" class="form-label">Logo del broker: </label>
-                              <input name="nuevo_logo" type="file" class="form-control" aria-label="Logo del broker" aria-describedby="basic-addon1">
+                              <label for="nuevo_logo" class="form-label">Logo de la aseguradora: </label>
+                              <input name="nuevo_logo" type="file" class="form-control" aria-label="Logo de la aseguradora" aria-describedby="basic-addon1">
                             </div>
                             <div class="mb-5">
                               <span class="count_top">
@@ -149,28 +149,10 @@
                               </div>
                             </div>
                             <div class="mb-3">
-                              <label for="nuevo_domicilio" class="form-label">Oficina del broker: </label>
-                              <input name="nuevo_domicilio" type="text" class="form-control" aria-label="Oficina del broker" aria-describedby="basic-addon1">
+                              <label for="nuevo_ruc_nit" class="form-label">RUC / NIT: </label>
+                              <input name="nuevo_ruc_nit" type="text" class="form-control" aria-label="RUC / NIT" aria-describedby="basic-addon1">
                             </div>
-                            <div class="mb-3">
-                              <label for="nuevo_web" class="form-label">URL web del broker: </label>
-                              <input name="nuevo_web" type="text" class="form-control" aria-label="URL web del broker" aria-describedby="basic-addon1">
-                            </div>
-                            <div class="mb-5">
-                              <span class="count_top">
-                                <label for="nuevo_matriz" class="form-label">Matriz: </label></span>                              
-                              <span class="count_top"></span>
-                              <div class="count">
-                                
-                                <select name="nuevo_matriz" class="form-select form-control-sm col-md-12" aria-label="Default select example">
-                                
-                                {% for matriz in matrices %}
-                                  <option value="{{matriz.id}}">{{matriz.nombre}}</option>
-                                 {% endfor %}
-                                </select>
-                              </div>
-                            </div>
-
+            
                               <div class="mb-3">
                                 <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
                               <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
@@ -218,47 +200,45 @@
                           <th scope="col">Nombre</th>
                           <th scope="col">Logo</th>
                           <th scope="col">País</th>
-                          <th scope="col">Domicilio</th>
-                          <th scope="col">Url web</th>
-                          <th scope="col">Matriz</th>
+                          <th scope="col">RUC / NIT</th>
                           <th scope="col">Activo</th>
                           <th scope="col">Contactos</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {% for broker in pages %}
+                        {% for aseguradora in pages %}
                         
                         <tr>
                           <td>
                             <div class="d-flex align-items-center" style="overflow: auto;">
                               <!-- Botón de Editar -->
-                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ broker.id }}">
+                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ aseguradora.id }}">
                                 <i class="fa fa-edit"></i>
                               </button>
                           
                               <!-- Modal de edición -->
-                              <form data-backdrop="false" method="post" action="{% url 'update_broker' broker.id %}" enctype="multipart/form-data">
+                              <form data-backdrop="false" method="post" action="{% url 'update_aseguradora' aseguradora.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div data-backdrop="false" class="modal fade" id="editarModal{{ broker.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                                <div data-backdrop="false" class="modal fade" id="editarModal{{ aseguradora.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
                                   <div data-backdrop="false" class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Editar broker</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Editar aseguradora</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                           <span aria-hidden="true">&times;</span>
                                         </button>
                                       </div>
                                       <div data-backdrop="false" class="modal-body">
                                         <div class="mb-3">
-                                          <label for="editar_nombre" class="form-label">Nombre del broker:</label>
-                                          <input name="editar_nombre" value="{{ broker.nombre }}" type="text" class="form-control" aria-label="Nombre del broker" aria-describedby="basic-addon1">
+                                          <label for="editar_nombre" class="form-label">Nombre de la aseguradora:</label>
+                                          <input name="editar_nombre" value="{{ aseguradora.nombre }}" type="text" class="form-control" aria-label="Nombre de la aseguradora" aria-describedby="basic-addon1">
                                         </div>
                                         <div class="mb-3">
-                                          <label for="editar_logo" class="form-label">Logo del broker:</label>
-                                          <input name="editar_logo" type="file" class="form-control" aria-label="Logo del broker" aria-describedby="basic-addon1">
+                                          <label for="editar_logo" class="form-label">Logo de la aseguradora:</label>
+                                          <input name="editar_logo" type="file" class="form-control" aria-label="Logo de la aseguradora" aria-describedby="basic-addon1">
                                           <!-- Si hay un logo, mostrar la imagen actual -->
-                                          {% if broker.logo %}
-                                            <img src="{{ broker.logo.url }}" alt="Logo actual" style="max-width: 150px; margin-top: 10px;">
+                                          {% if aseguradora.logo %}
+                                            <img src="{{ aseguradora.logo.url }}" alt="Logo actual" style="max-width: 150px; margin-top: 10px;">
                                           {% endif %}
                                         </div>
                                         <div class="mb-5">
@@ -266,33 +246,19 @@
                                             <label for="pais">País</label>
                                             <select class="form-control" id="editar_pais" name="editar_pais">
                                               {% for pais in paises %}
-                                              <option value="{{ pais.id }}" {% if pais.id == broker.pais.id %}selected{% endif %}>
+                                              <option value="{{ pais.id }}" {% if pais.id == aseguradora.pais.id %}selected{% endif %}>
                                                 {{ pais.nombre }}
                                               </option>
                                               {% endfor %}
                                             </select>
                                           </div>
-                                          <div class="form-group">
-                                            <label for="editar_matriz">Matriz</label>
-                                            <select class="form-control" id="editar_matriz" name="editar_matriz">
-                                              {% for matriz in matrices %}
-                                              <option value="{{ matriz.id }}" {% if matriz.id == broker.matriz.id %}selected{% endif %}>
-                                                {{ matriz.nombre }}
-                                              </option>
-                                              {% endfor %}
-                                            </select>
-                                          </div>
                                           <div class="mb-3">
-                                            <label for="editar_domicilio" class="form-label">Oficina del broker:</label>
-                                            <input name="editar_domicilio" value="{{ broker.domicilio_oficina }}" type="text" class="form-control" aria-label="Oficina del broker" aria-describedby="basic-addon1">
-                                          </div>
-                                          <div class="mb-3">
-                                            <label for="editar_web" class="form-label">Url web del broker:</label>
-                                            <input name="editar_web" value="{{ broker.url_web }}" type="text" class="form-control" aria-label="Url web del broker" aria-describedby="basic-addon1">
+                                            <label for="editar_ruc_nit" class="form-label">RUC / NIT:</label>
+                                            <input name="editar_ruc_nit" value="{{ aseguradora.ruc_nit }}" type="text" class="form-control" aria-label="RUC / NIT" aria-describedby="basic-addon1">
                                           </div>
                                           <div class="form-group">
                                             <label for="activo">Activo</label>
-                                            <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if broker.activo %}checked{% endif %}>
+                                            <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if aseguradora.activo %}checked{% endif %}>
                                           </div>
                                           <div class="mb-5">
                                             <span class="count_top">
@@ -302,7 +268,7 @@
                                               
                                               <select name="editar_contacto" id="multi_select_edicion" class="multi-select-pillbox-2" multiple="multiple">
                                                 {% for contacto in contactos %}
-                                                    <option value="{{ contacto.id }}" {% if contacto in broker.contactos.all %}selected{% endif %}>
+                                                    <option value="{{ contacto.id }}" {% if contacto in aseguradora.contactos.all %}selected{% endif %}>
                                                         {{ contacto.nombre }}
                                                     </option>
                                                 {% endfor %}
@@ -321,20 +287,18 @@
                               </form>
                           
                               <!-- Botón de Eliminar -->
-                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_broker' broker.id %}">
+                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_aseguradora' aseguradora.id %}">
                                 <i class="fa fa-trash-o text-danger"></i>
                               </button>
                             </div>
                           </td>
-                          <td>{{ broker.nombre }}</td>
+                          <td>{{ aseguradora.nombre }}</td>
                           <td>
-                            <img src="{{ broker.logo.url }}" alt="{{ broker.nombre }}" style="max-width: 100px; height: auto;">
+                            <img src="{{ aseguradora.logo.url }}" alt="{{ aseguradora.nombre }}" style="max-width: 100px; height: auto;">
                           </td>
-                          <td>{{ broker.pais }}</td>
-                          <td>{{ broker.domicilio_oficina }}</td>
-                          <td>{{ broker.url_web }}</td>
-                          <td>{{ broker.matriz.nombre }}</td>
-                          {% if broker.activo %}
+                          <td>{{ aseguradora.pais }}</td>
+                          <td>{{ aseguradora.ruc_nit }}</td>
+                          {% if aseguradora.activo %}
                           <td class="green">Si</td>
   
                           {% else %}
@@ -343,7 +307,7 @@
                           {% endif %}
                           
                           <td>
-                            {% for contacto in broker.contactos.all %}
+                            {% for contacto in aseguradora.contactos.all %}
                               {{ contacto.nombre }}<br>
                             {% empty %}
                               No hay contactos asignados

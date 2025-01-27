@@ -139,7 +139,7 @@ class Matriz(models.Model):
 
 class Broker(models.Model):
     nombre = models.CharField(max_length=100)
-    logo = models.ImageField(upload_to='logos/')  # El logo se almacena en la carpeta 'media/logos/'
+    logo = models.ImageField(upload_to='logos/')
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
     domicilio_oficina = models.CharField(max_length=100)
     url_web = models.CharField(max_length=100)
@@ -193,14 +193,18 @@ class Broker(models.Model):
 
 class Aseguradora(models.Model):
     nombre = models.CharField(max_length=100)
+    logo = models.ImageField(upload_to='logos/') 
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
-    tax_id = models.CharField(max_length=100)
+    ruc_nit = models.CharField(max_length=100)
     activo = models.BooleanField(default=False)
     modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     contactos = models.ManyToManyField(Contacto, related_name='aseguradora')
 
     def save(self, *args, **kwargs):
-        if self.pk:  # Solo para objetos existentes
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
             original = self.__class__.objects.get(pk=self.pk)
             changes = {}
 
@@ -238,19 +242,21 @@ class Aseguradora(models.Model):
                     raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
 
         super().save(*args, **kwargs)  # Guardar el objeto normalmente
-
 
 class Empresa(models.Model):
     nombre = models.CharField(max_length=100)
     matriz = models.ForeignKey(Matriz, on_delete=models.CASCADE)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
-    tax_id = models.CharField(max_length=100)
+    ruc_nit = models.CharField(max_length=100)
     activo = models.BooleanField(default=False)
     modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    contactos = models.ManyToManyField(Contacto, related_name='empresas')
+    contactos = models.ManyToManyField(Contacto, related_name='empresa')
 
     def save(self, *args, **kwargs):
-        if self.pk:  # Solo para objetos existentes
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
             original = self.__class__.objects.get(pk=self.pk)
             changes = {}
 
@@ -288,7 +294,6 @@ class Empresa(models.Model):
                     raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
 
         super().save(*args, **kwargs)  # Guardar el objeto normalmente
-
 
 class Seguro(models.Model):
     TIPO_CHOICES = [
@@ -319,9 +324,12 @@ class Seguro(models.Model):
     limite_asegurado = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
     activo = models.BooleanField(default=False)
     modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    
+
     def save(self, *args, **kwargs):
-        if self.pk:  # Solo para objetos existentes
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
             original = self.__class__.objects.get(pk=self.pk)
             changes = {}
 
