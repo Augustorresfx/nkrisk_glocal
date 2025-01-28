@@ -184,7 +184,7 @@ class EliminarContactoView(View):
         if user.is_superuser:
             # Si el usuario es superusuario, eliminamos el contacto directamente
             contacto.delete()
-            messages.success(request, 'El contacto ha sido eliminado correctamente.')
+            messages.success(request, 'El elemento ha sido eliminado correctamente.')
             return redirect('contactos_admin')
 
         # Si no es superusuario, registramos la solicitud de eliminación sin modificar el modelo Contacto

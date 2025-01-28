@@ -227,7 +227,7 @@ class EliminarBrokerView(View):
 
         if user.is_superuser:
             broker.delete()
-            messages.success(request, 'El broker ha sido eliminado directamente.')
+            messages.success(request, 'El elemento ha sido eliminado directamente.')
             return redirect('brokers_admin')
 
         changes = {
