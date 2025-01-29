@@ -12,6 +12,11 @@ from django.shortcuts import get_list_or_404
 # Importe Modelos
 from ..models import Pais, Broker, PendingChange, Matriz, Contacto
 
+# REPORTE
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Border, Side
+from django.http import HttpResponse
+
 # ADMINISTRACION
 @method_decorator(login_required, name='dispatch')
 class BrokerView(View):
@@ -20,7 +25,7 @@ class BrokerView(View):
         # Obtener filtros desde los parámetros GET
         nombre_filtro = request.GET.get('nombre', '').strip()
         pais_filtro = request.GET.get('pais', '').strip()
-
+        exportar = request.GET.get('exportar', None)
         # Filtrar los brokers con base en los filtros
         brokers = Broker.objects.all()
 
@@ -34,6 +39,10 @@ class BrokerView(View):
         brokers_paginados = Paginator(brokers, 30)
         page_number = request.GET.get("page")
         filter_pages = brokers_paginados.get_page(page_number)
+
+        # Si se solicita exportar, generar el archivo Excel
+        if exportar:
+            return self.generar_excel_brokers(brokers)
 
         # Obtener la lista de países
         paises = Pais.objects.all()
@@ -119,6 +128,71 @@ class BrokerView(View):
                 messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
 
         return HttpResponseRedirect(request.path_info)
+    
+    def generar_excel_brokers(self, brokers):
+        # Crear un nuevo archivo Excel
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Brokers"
+
+        # Estilos
+        font_header = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+        relleno_header = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+        bordes = Border(
+            left=Side(border_style="thin", color="000000"),
+            right=Side(border_style="thin", color="000000"),
+            top=Side(border_style="thin", color="000000"),
+            bottom=Side(border_style="thin", color="000000"),
+        )
+
+        # Encabezados
+        encabezados = ["Nombre", "País", "Oficina", "Web", "Matriz", "Activo", "Contactos"]
+        for col_num, header in enumerate(encabezados, start=1):
+            cell = sheet.cell(row=1, column=col_num, value=header)
+            cell.font = font_header
+            cell.fill = relleno_header
+            cell.border = bordes
+
+        # Datos
+        for row_num, broker in enumerate(brokers, start=2):
+            # Columna 1: Nombre
+            cell_nombre = sheet.cell(row=row_num, column=1, value=broker.nombre)
+            cell_nombre.border = bordes
+
+            # Columna 2: País
+            cell_pais = sheet.cell(row=row_num, column=2, value=broker.pais.nombre)
+            cell_pais.border = bordes
+
+            # Columna 3: Oficina
+            cell_oficina = sheet.cell(row=row_num, column=3, value=broker.domicilio_oficina)
+            cell_oficina.border = bordes
+
+            # Columna 4: Web
+            cell_web = sheet.cell(row=row_num, column=4, value=broker.url_web)
+            cell_web.border = bordes
+
+            # Columna 5: Matriz
+            cell_matriz = sheet.cell(row=row_num, column=5, value=broker.matriz.nombre)
+            cell_matriz.border = bordes
+
+            # Columna 6: Activo
+            cell_activo = sheet.cell(row=row_num, column=6, value="SI" if broker.activo else "NO")
+            cell_activo.border = bordes
+
+            # Columna 7: Contactos
+            # Obtener nombres de contactos separados por comas
+            contactos_nombres = ", ".join(contacto.nombre for contacto in broker.contactos.all())
+            sheet.cell(row=row_num, column=7, value=contactos_nombres).border = bordes
+
+        # Crear la respuesta HTTP
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="matrices.xlsx"'
+        workbook.save(response)
+        workbook.close()
+        return response
+
 
 @method_decorator(login_required, name='dispatch')
 class EditarBrokerView(View):

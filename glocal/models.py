@@ -33,7 +33,64 @@ class PendingChange(models.Model):
 
     def __str__(self):
         return f"{self.model_name} - {self.object_id}"
+    
+class Siniestro(models.Model):
+    nombre = models.CharField(max_length=200)
+    vigencia_hasta = models.DateField(null=True, blank=True)
+    monto = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
+    activo = models.BooleanField(default=False)
+    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
+            original = self.__class__.objects.get(pk=self.pk)
+            changes = {}
+
+            for field in self._meta.fields:
+                field_name = field.name
+                original_value = getattr(original, field_name)
+                new_value = getattr(self, field_name)
+
+                # Manejar ForeignKey dinámicamente
+                if isinstance(field, models.ForeignKey):
+                    original_value = {
+                        "id": original_value.pk if original_value else None,
+                        "name": str(original_value) if original_value else None,
+                    }
+                    new_value = {
+                        "id": new_value.pk if new_value else None,
+                        "name": str(new_value) if new_value else None,
+                    }
+
+                # Comparar valores y registrar cambios
+                if original_value != new_value:
+                    changes[field_name] = {"old": original_value, "new": new_value}
+
+            # Crear un registro de cambios si hay diferencias
+            if changes:
+                from .models import PendingChange
+                if self.modified_by and isinstance(self.modified_by, User):
+                    PendingChange.objects.create(
+                        model_name=self._meta.model_name,
+                        object_id=self.pk,
+                        changes=changes,
+                        submitted_by=self.modified_by,
+                    )
+                else:
+                    raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
+
+        super().save(*args, **kwargs)  # Guardar el objeto normalmente
+
+class Nomina(models.Model):
+    nombre = models.CharField(max_length=100)
+    apellido = models.CharField(max_length=100)
+    fecha_nacimiento = models.DateField(null=True, blank=True)
+    dni_cuil = models.CharField(max_length=100)
+    suma_asegurada = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
+    
 class Contacto(models.Model):
     nombre = models.CharField(max_length=100)
     email = models.EmailField()
@@ -303,18 +360,26 @@ class Seguro(models.Model):
         ('casualty-rc_p', 'CASUALTY - RESPONSABILIDAD CIVIL DE PRODUCTOS'),
         ('casualty-rc_r', 'CASUALTY - RESPONSABILIDAD CIVIL DE RECALL'),
         ('casualty-rc_p_eyo', 'CASUALTY - RESPONSABILIDAD CIVIL DE PROFESIONAL (E&O)'),
-        ('casualty-r_f', 'Casualty - ROBO / FIDELITY'),
+        ('casualty-r_f', 'CASUALTY - ROBO / FIDELITY'),
         ('otros-cyber-risk', 'OTROS - CYBER RISK'),
         ('otros-vehiculos', 'OTROS - VEHICULOS'),
         ('property-cascos_hull', 'PROPOERTY - CASCOS / HULL'),
         ('property-multiriesgo_prop', 'PROPERTY - MULTIRIESGO / PROPERTY'),
         ('transporte-expo', 'TRANSPORTE (EXPO)'),
-        ('transporte-impo', 'TRANSPORTE (IMPO)')
+        ('transporte-impo', 'TRANSPORTE (IMPO)'),
+        ('accidentes-personales', 'ACCIDENTES PERSONALES')
+    ]
+    MONEDA_CHOICES = [
+        ('ars', 'ARS'),
+        ('usd', 'USD'),
+        ('eur', 'EUR'),
+
     ]
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
     matriz = models.ForeignKey(Matriz, on_delete=models.CASCADE)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     broker = models.ForeignKey(Broker, on_delete=models.CASCADE)
+    moneda = models.CharField(max_length=25, choices=MONEDA_CHOICES)
     aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE)
     tipo_seguro = models.CharField(max_length=25, choices=TIPO_CHOICES)
     nro_poliza = models.IntegerField()
@@ -367,12 +432,70 @@ class Seguro(models.Model):
                     raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
 
         super().save(*args, **kwargs)  # Guardar el objeto normalmente
-
-    
     
     def __str__(self):
         return f"{self.empresa.nombre} ({self.get_tipo_seguro_display()})"
     
+class SeguroAccidentePersonal(Seguro):
+    COBERTURA_CHOICES =  {
+        ('muerte-incapacidad', 'Muerte e incapacidad'),
+        ('asistencia-medica-farmaceutica', 'Asistencia médica / farmacéutica'),
+    }
+
+    created = models.DateTimeField(auto_now_add=True)
+    cobertura = models.CharField(max_length=55, choices=COBERTURA_CHOICES)
+    clausula_de_no_repeticion = models.CharField(max_length=255)
+    a_favor_de = models.CharField(max_length=100)
+    beneficiario_preferente = models.CharField(max_length=100)
+    def save(self, *args, **kwargs):
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
+            original = self.__class__.objects.get(pk=self.pk)
+            changes = {}
+
+            for field in self._meta.fields:
+                field_name = field.name
+                original_value = getattr(original, field_name)
+                new_value = getattr(self, field_name)
+
+                # Manejar ForeignKey dinámicamente
+                if isinstance(field, models.ForeignKey):
+                    original_value = {
+                        "id": original_value.pk if original_value else None,
+                        "name": str(original_value) if original_value else None,
+                    }
+                    new_value = {
+                        "id": new_value.pk if new_value else None,
+                        "name": str(new_value) if new_value else None,
+                    }
+
+                # Comparar valores y registrar cambios
+                if original_value != new_value:
+                    changes[field_name] = {"old": original_value, "new": new_value}
+
+            # Crear un registro de cambios si hay diferencias
+            if changes:
+                from .models import PendingChange
+                if self.modified_by and isinstance(self.modified_by, User):
+                    PendingChange.objects.create(
+                        model_name=self._meta.model_name,
+                        object_id=self.pk,
+                        changes=changes,
+                        submitted_by=self.modified_by,
+                    )
+                else:
+                    raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
+
+        super().save(*args, **kwargs)  # Guardar el objeto normalmente
+
+class SeguroResponsabilidadCivil(Seguro):
+    cobertura = models.CharField(max_length=100)
+    limite = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
+    adicionales = models.BooleanField(default=False)
+    
+
 class SeguroVehiculo(Seguro):
     created = models.DateTimeField(auto_now_add=True)
     numero_flota = models.IntegerField(null=True, blank=True)

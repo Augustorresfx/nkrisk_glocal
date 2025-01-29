@@ -56,7 +56,6 @@ def get_foreign_key_name(value, field_name):
         print(f"Error al obtener el objeto: {e}")
         return "N/A"  # Si hay un error, retornar "N/A"
 
-
 @register.filter
 def get_years_to_current(value):
     return range(2020, datetime.datetime.now().year + 1)
@@ -98,3 +97,16 @@ def format_date(value):
     except (ValueError, TypeError) as e:
         print("Error al formatear fecha: {e}")
         return value
+    
+    
+@register.simple_tag
+def my_url(value, field_name, urlencode=None):
+    url = '?{}={}'.format(field_name, value)
+
+    if urlencode:
+        querystring = urlencode.split('&')
+        filtered_querystring = filter(lambda p: p.split('=')[0]!=field_name, querystring)
+        encoded_querystring = '&'.join(filtered_querystring)
+        url = '{}&{}'.format(url, encoded_querystring)
+
+    return url

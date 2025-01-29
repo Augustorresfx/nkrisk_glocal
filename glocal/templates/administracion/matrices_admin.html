@@ -1,4 +1,5 @@
 {% extends 'index_master.html' %}
+{% load filters %}
 {% load static %}
 {% block content %}
 
@@ -52,13 +53,25 @@
 
                 <div class="col-md-2 col-sm-4">
                   <span class="count_top" style="visibility: hidden;">Buscar</span>
-                  <div class=""><!-- Button trigger modal -->
-                    <button type="submit" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
+                  <div class="">
+                    <button type="submit" class="btn btn-outline-primary btn-sm" >
                       <i class="fa fa-search"></i>
                       Buscar
                     </button>
                   </div>
                 </div>
+
+                <!-- Botón Exportar -->
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Exportar</span>
+                  <div class="">
+                    <button type="submit" name="exportar" value="1" class="btn btn-outline-success btn-sm">
+                      <i class="fa fa-file-excel-o"></i>
+                      Exportar
+                    </button>
+                  </div>
+                </div>
+               
               </form>
                 <div class="col-md-2 col-sm-4">
                   <span class="count_top" style="visibility: hidden;">Nuevo</span>
@@ -223,7 +236,52 @@
         <tbody id="table-body" class="table-body"> </tbody></div>
             </div>
           </div>
+
+          <!-- PAGINACION -->
+
+          <div class="mx-2">
+            <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+    
+    
+                {% if pages.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="{% my_url 1 'page' request.GET.urlencode %}">&laquo; primer página</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="{% my_url pages.previous_page_number 'page' request.GET.urlencode %}">anterior</a>
+                  </li>
+    
+                    {% endif %}
+          
+          
+                    <li class="page-item">
+                      
+                    <a class="page-link" href="{% my_url pages.number 'page' request.GET.urlencode %}">{{ pages.number }}</a>
+                  
+                   
+                    </li>
+                    <li class="page-item">
+                      
+                      <a class="page-link" href="{% my_url pages.paginator.num_pages 'page' request.GET.urlencode %}">{{ pages.paginator.num_pages }}</a>
+                    
+                     
+                      </li>
+                
+              
            
+                {% if pages.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{% my_url pages.next_page_number 'page' request.GET.urlencode %}">siguiente</a>
+                 </li>
+                 <li class="page-item">
+                <a class="page-link" href="{% my_url pages.paginator.num_pages 'page' request.GET.urlencode %}">última página &raquo;</a>
+              </li>
+                {% endif %}
+              </ul>
+              </nav>
+       
+            </div>
           
               <!--
                 MOVIMIENTOS
