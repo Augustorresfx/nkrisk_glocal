@@ -10,6 +10,11 @@ from django.shortcuts import redirect
 # Importe Modelos
 from ..models import User, Contacto, PendingChange
 
+# REPORTE
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Border, Side
+from django.http import HttpResponse
+
 # ADMINISTRACION
 @method_decorator(login_required, name='dispatch')
 class ContactoView(View):
@@ -38,12 +43,15 @@ class ContactoView(View):
         contactos_paginados = Paginator(contactos, 30)
         page_number = request.GET.get("page")
         filter_pages = contactos_paginados.get_page(page_number)
-        for contacto in filter_pages:
+        
+        exportar = request.GET.get('exportar', None)
+        # Si se solicita exportar, generar el archivo Excel
+        if exportar:
+            return self.generar_excel_contactos(contactos)
 
-            print(contacto.user)
         # Obtener la lista de usuarios
         usuarios = User.objects.all()
-        print("Usuarios: ", usuarios)
+        
         context = {
             'contactos': contactos,
             'pages': filter_pages,
@@ -103,6 +111,57 @@ class ContactoView(View):
                 messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
 
         return HttpResponseRedirect(request.path_info)
+    
+    def generar_excel_contactos(self, contactos):
+        # Crear un nuevo archivo Excel
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Contactos"
+
+        # Estilos
+        font_header = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+        relleno_header = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+        bordes = Border(
+            left=Side(border_style="thin", color="000000"),
+            right=Side(border_style="thin", color="000000"),
+            top=Side(border_style="thin", color="000000"),
+            bottom=Side(border_style="thin", color="000000"),
+        )
+
+        # Encabezados
+        encabezados = ["Nombre", "Email", "Teléfono", "Cargo"]
+        for col_num, header in enumerate(encabezados, start=1):
+            cell = sheet.cell(row=1, column=col_num, value=header)
+            cell.font = font_header
+            cell.fill = relleno_header
+            cell.border = bordes
+
+        # Datos
+        for row_num, contacto in enumerate(contactos, start=2):
+            # Columna 1: Nombre
+            cell_nombre = sheet.cell(row=row_num, column=1, value=contacto.nombre)
+            cell_nombre.border = bordes
+
+            # Columna 2: Email
+            cell_pais = sheet.cell(row=row_num, column=2, value=contacto.email)
+            cell_pais.border = bordes
+
+            # Columna 3: Telefono
+            cell_oficina = sheet.cell(row=row_num, column=3, value=contacto.telefono)
+            cell_oficina.border = bordes
+
+            # Columna 4: Cargo
+            cell_web = sheet.cell(row=row_num, column=4, value=contacto.cargo)
+            cell_web.border = bordes
+
+        # Crear la respuesta HTTP
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="contactos.xlsx"'
+        workbook.save(response)
+        workbook.close()
+        return response
 
     
 @method_decorator(login_required, name='dispatch')

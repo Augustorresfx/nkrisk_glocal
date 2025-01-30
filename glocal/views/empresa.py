@@ -12,6 +12,11 @@ from django.shortcuts import get_list_or_404
 # Importe Modelos
 from ..models import Pais, Broker, PendingChange, Matriz, Contacto, Empresa
 
+# REPORTE
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Border, Side
+from django.http import HttpResponse
+
 # ADMINISTRACION
 @method_decorator(login_required, name='dispatch')
 class EmpresaView(View):
@@ -29,6 +34,13 @@ class EmpresaView(View):
 
         if pais_filtro:
             empresas = empresas.filter(pais__id=pais_filtro)
+
+
+        exportar = request.GET.get('exportar', None)
+
+        # Si se solicita exportar, generar el archivo Excel
+        if exportar:
+            return self.generar_excel_empresas(empresas)
 
         # Paginación
         empresas_paginados = Paginator(empresas, 30)
@@ -112,6 +124,67 @@ class EmpresaView(View):
                 messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
 
         return HttpResponseRedirect(request.path_info)
+    
+    def generar_excel_empresas(self, empresas):
+        # Crear un nuevo archivo Excel
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "empresas"
+
+        # Estilos
+        font_header = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+        relleno_header = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+        bordes = Border(
+            left=Side(border_style="thin", color="000000"),
+            right=Side(border_style="thin", color="000000"),
+            top=Side(border_style="thin", color="000000"),
+            bottom=Side(border_style="thin", color="000000"),
+        )
+
+        # Encabezados
+        encabezados = ["Nombre", "Matriz", "País", "RUC / NIT", "Activo", "Contactos"]
+        for col_num, header in enumerate(encabezados, start=1):
+            cell = sheet.cell(row=1, column=col_num, value=header)
+            cell.font = font_header
+            cell.fill = relleno_header
+            cell.border = bordes
+
+        # Datos
+        for row_num, empresa in enumerate(empresas, start=2):
+            # Columna 1: Nombre
+            cell_nombre = sheet.cell(row=row_num, column=1, value=empresa.nombre)
+            cell_nombre.border = bordes
+
+            # Columna 2: Matriz
+            cell_matriz = sheet.cell(row=row_num, column=2, value=empresa.matriz.nombre)
+            cell_matriz.border = bordes
+
+            # Columna 3: País
+            cell_pais = sheet.cell(row=row_num, column=3, value=empresa.pais.nombre)
+            cell_pais.border = bordes
+
+            # Columna 4: RUC / NIT
+            cell_ruc_nit = sheet.cell(row=row_num, column=4, value=empresa.ruc_nit)
+            cell_ruc_nit.border = bordes
+
+            # Columna 5: Activo
+            cell_activo = sheet.cell(row=row_num, column=5, value="SI" if empresa.activo else "NO")
+            cell_activo.border = bordes
+
+            # Columna 6: Contactos
+            # Obtener nombres de contactos separados por comas
+            contactos_nombres = ", ".join(contacto.nombre for contacto in empresa.contactos.all())
+            sheet.cell(row=row_num, column=6, value=contactos_nombres).border = bordes
+
+        # Crear la respuesta HTTP
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="empresas.xlsx"'
+        workbook.save(response)
+        workbook.close()
+        return response
+
 
 @method_decorator(login_required, name='dispatch')
 class EditarEmpresaView(View):

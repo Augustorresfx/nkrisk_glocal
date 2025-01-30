@@ -12,6 +12,11 @@ from django.shortcuts import get_list_or_404
 # Importe Modelos
 from ..models import Pais, Broker, Aseguradora, PendingChange, Matriz, Contacto
 
+# REPORTE
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Border, Side
+from django.http import HttpResponse
+
 # ADMINISTRACION
 @method_decorator(login_required, name='dispatch')
 class AseguradoraView(View):
@@ -29,6 +34,12 @@ class AseguradoraView(View):
 
         if pais_filtro:
             aseguradoras = aseguradoras.filter(pais__id=pais_filtro)
+
+        exportar = request.GET.get('exportar', None)
+
+        # Si se solicita exportar, generar el archivo Excel
+        if exportar:
+            return self.generar_excel_aseguradoras(aseguradoras)
 
         # Paginación
         aseguradoras_paginados = Paginator(aseguradoras, 30)
@@ -59,8 +70,7 @@ class AseguradoraView(View):
         ruc_nit = request.POST.get('nuevo_ruc_nit')
         pais_id = request.POST.get('nuevo_pais')
         activo = request.POST.get('nuevo_activo')
-        contactos_ids = request.POST.getlist('nuevo_contacto') 
-        print("Tax ID", ruc_nit)
+        contactos_ids = request.POST.getlist('nuevo_contacto')
         if activo == "on":
             activo = True
         else:
@@ -78,7 +88,7 @@ class AseguradoraView(View):
             'activo': {'new': activo},
             'contactos': {'new': [c.id for c in contactos]},  # IDs de los contactos seleccionados
         }
-        print("Cambios: ", changes)
+
         if user.is_superuser:
             try:
                 # Crear el objeto directamente si el usuario es superusuario
@@ -109,6 +119,62 @@ class AseguradoraView(View):
                 messages.error(request, f'Error: No se pudo enviar la solicitud. Detalles: {str(e)}')
 
         return HttpResponseRedirect(request.path_info)
+    
+    def generar_excel_aseguradoras(self, aseguradoras):
+        # Crear un nuevo archivo Excel
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "aseguradoras"
+
+        # Estilos
+        font_header = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
+        relleno_header = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+        bordes = Border(
+            left=Side(border_style="thin", color="000000"),
+            right=Side(border_style="thin", color="000000"),
+            top=Side(border_style="thin", color="000000"),
+            bottom=Side(border_style="thin", color="000000"),
+        )
+
+        # Encabezados
+        encabezados = ["Nombre", "País", "RUC / NIT", "Activo", "Contactos"]
+        for col_num, header in enumerate(encabezados, start=1):
+            cell = sheet.cell(row=1, column=col_num, value=header)
+            cell.font = font_header
+            cell.fill = relleno_header
+            cell.border = bordes
+
+        # Datos
+        for row_num, aseguradora in enumerate(aseguradoras, start=2):
+            # Columna 1: Nombre
+            cell_nombre = sheet.cell(row=row_num, column=1, value=aseguradora.nombre)
+            cell_nombre.border = bordes
+
+            # Columna 2: País
+            cell_pais = sheet.cell(row=row_num, column=2, value=aseguradora.pais.nombre)
+            cell_pais.border = bordes
+
+            # Columna 3: Ruc / nit
+            cell_oficina = sheet.cell(row=row_num, column=3, value=aseguradora.ruc_nit)
+            cell_oficina.border = bordes
+
+            # Columna 4: Activo
+            cell_activo = sheet.cell(row=row_num, column=4, value="SI" if aseguradora.activo else "NO")
+            cell_activo.border = bordes
+
+            # Columna 5: Contactos
+            # Obtener nombres de contactos separados por comas
+            contactos_nombres = ", ".join(contacto.nombre for contacto in aseguradora.contactos.all())
+            sheet.cell(row=row_num, column=5, value=contactos_nombres).border = bordes
+
+        # Crear la respuesta HTTP
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="aseguradoras.xlsx"'
+        workbook.save(response)
+        workbook.close()
+        return response
 
 @method_decorator(login_required, name='dispatch')
 class EditarAseguradoraView(View):

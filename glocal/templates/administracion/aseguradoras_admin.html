@@ -72,7 +72,7 @@
 
       <!-- messages -->
             <div class="row mb-4 m-0">
-              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'matrices_admin' %}">
+              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'aseguradoras_admin' %}">
               <div class="col-md-12 col-sm-12 m-0 p-0">
                 <div class="col-md-2 col-sm-4 m-0 p-0">
                   <span>Nombre</span>
@@ -95,10 +95,21 @@
 
                 <div class="col-md-2 col-sm-4">
                   <span class="count_top" style="visibility: hidden;">Buscar</span>
-                  <div class=""><!-- Button trigger modal -->
-                    <button type="submit" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#exampleModal">
+                  <div class="">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
                       <i class="fa fa-search"></i>
                       Buscar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Botón Exportar -->
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Exportar</span>
+                  <div class="">
+                    <button type="submit" name="exportar" value="1" class="btn btn-outline-success btn-sm">
+                      <i class="fa fa-file-excel-o"></i>
+                      Exportar
                     </button>
                   </div>
                 </div>

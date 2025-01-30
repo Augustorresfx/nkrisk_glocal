@@ -584,7 +584,7 @@ class Archivo(models.Model):
     broker = models.ForeignKey(Broker, on_delete=models.CASCADE)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     activo = models.BooleanField(default=False)
-    # Ruta de almacenamiento del archivo
+    archivo = models.FileField(upload_to="archivos/")
 
     def __str__(self):
         return self.nombre

@@ -72,8 +72,7 @@ class BrokerView(View):
         matriz_id = request.POST.get('nuevo_matriz')
         pais_id = request.POST.get('nuevo_pais')
         activo = request.POST.get('nuevo_activo')
-        contactos_ids = request.POST.getlist('nuevo_contacto') 
-        print(f"Domicilio recibido: {domicilio}")
+        contactos_ids = request.POST.getlist('nuevo_contacto')
         if activo == "on":
             activo = True
         else:
@@ -188,7 +187,7 @@ class BrokerView(View):
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        response["Content-Disposition"] = 'attachment; filename="matrices.xlsx"'
+        response["Content-Disposition"] = 'attachment; filename="brokers.xlsx"'
         workbook.save(response)
         workbook.close()
         return response

@@ -36,6 +36,17 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # Versiones viejas de Android o IOS
 SESSION_COOKIE_SAMESITE = 'Lax'
 
+# AWS S3 Settings
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')
+AWS_QUERYSTRING_AUTH = os.environ.get('AWS_QUERYSTRING_AUTH')
+
+
+# Configuración para que Render pueda acceder
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -63,7 +74,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'simple_history',
     'django_extensions',
-    
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -169,6 +180,8 @@ if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
     # Turn on WhiteNoise storage backend that takes care of compressing static files
     # and creating unique names for each version so they can safely be cached forever.
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # AWS STORAGE
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
