@@ -39,7 +39,7 @@ const stars = getStarfield({ numStars: 1000, fog: false });
 scene.add(stars);
 
 // Check for more datasets
-fetch('/glocal/static/geojson/ne_110m_land.json')
+fetch('https://testingdocuments36.s3.amazonaws.com/static/geojson/ne_110m_land.json')
   .then(response => response.text())
   .then(text => {
     const data = JSON.parse(text);
