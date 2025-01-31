@@ -112,19 +112,21 @@ class Contacto(models.Model):
         return self.nombre
     
     def save(self, *args, **kwargs):
-        # Verificar si se deben registrar cambios
+        # Para habilitar el rastreo de cambios (puedes controlar este comportamiento al llamar a save())
         track_changes = kwargs.pop("track_changes", True)
 
-        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
+        # Solo se registran cambios si el objeto ya existe y track_changes está activado
+        if self.pk and track_changes:
             original = self.__class__.objects.get(pk=self.pk)
             changes = {}
 
+            # Comparar todos los campos del modelo
             for field in self._meta.fields:
                 field_name = field.name
                 original_value = getattr(original, field_name)
                 new_value = getattr(self, field_name)
 
-                # Manejar ForeignKey dinámicamente
+                # Manejar ForeignKey (relaciones) dinámicamente
                 if isinstance(field, models.ForeignKey):
                     original_value = {
                         "id": original_value.pk if original_value else None,
@@ -135,24 +137,28 @@ class Contacto(models.Model):
                         "name": str(new_value) if new_value else None,
                     }
 
-                # Comparar valores y registrar cambios
+                # Comparar los valores para detectar cambios
                 if original_value != new_value:
                     changes[field_name] = {"old": original_value, "new": new_value}
 
-            # Crear un registro de cambios si hay diferencias
+            # Si hay cambios, se crea un registro de PendingChange
             if changes:
                 from .models import PendingChange
+                
+                # Verificar si 'modified_by' está correctamente asignado
                 if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
                         changes=changes,
-                        submitted_by=self.modified_by,
+                        submitted_by=self.modified_by,  # El usuario que hizo los cambios
                     )
                 else:
-                    raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
+                    # Si modified_by no es una instancia válida de User, lanzamos un error
+                    raise ValueError("El campo 'modified_by' debe ser una instancia válida de CustomUser")
 
-        super().save(*args, **kwargs)  # Guardar el objeto normalmente
+        # Llamada al método save() original para guardar el objeto
+        super().save(*args, **kwargs)
 
 class Matriz(models.Model):
     nombre = models.CharField(max_length=100)

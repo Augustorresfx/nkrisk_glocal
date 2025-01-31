@@ -79,8 +79,9 @@ class ContactoView(View):
         user_id = request.POST.get('nuevo_user')
         user_custom = get_user_model()
         usuario_contacto = get_object_or_404(user_custom, id=user_id)
-        user = request.user
-
+       
+        user = get_user_model().objects.get(id=request.user.id)
+        print(user)
         # Crear una solicitud de creación pendiente
         changes = {
             'nombre': {'new': nombre},
@@ -96,7 +97,8 @@ class ContactoView(View):
                 email=email,
                 telefono=telefono,
                 cargo=cargo,
-                user = usuario_contacto
+                user = usuario_contacto,
+                modified_by = user,
                 )
                 messages.success(request, 'Se creó un nuevo elemento de forma exitosa.')
             except Exception as e:
@@ -168,7 +170,6 @@ class ContactoView(View):
         workbook.close()
         return response
 
-    
 @method_decorator(login_required, name='dispatch')
 class EditarContactoView(View):
     def post(self, request, contacto_id):
@@ -178,10 +179,13 @@ class EditarContactoView(View):
         telefono = request.POST.get('editar_telefono')
         cargo = request.POST.get('editar_cargo')
         user_id = request.POST.get('editar_usuario')
-        nombre = request.POST.get('editar_nombre')
 
-        user = request.user
-
+        # Obtener el usuario que está realizando la modificación
+        user = get_user_model().objects.get(id=request.user.id)
+        # Obtener el usuario de contacto relacionado por ID
+        usuario_contacto = get_user_model().objects.get(id=user_id)
+        print("User: ", user, type(user))
+        print("Usuario contacto", usuario_contacto, type(usuario_contacto))
         # Si el usuario es superuser, aplicar los cambios directamente
         if user.is_superuser:
             if contacto.nombre != nombre:
@@ -192,10 +196,10 @@ class EditarContactoView(View):
                 contacto.telefono = telefono
             if contacto.cargo != cargo:
                 contacto.cargo = cargo
-            if contacto.user_id != int(user_id):
-                contacto.user_id = user_id
+            if contacto.user != usuario_contacto:  # Cambié la comparación a 'user' en lugar de 'user_id'
+                contacto.user = usuario_contacto  # Asignar la instancia del usuario
 
-            contacto.save()  # Guardar los cambios directamente
+            contacto.save(track_changes=False)  # Guardar los cambios directamente
             messages.success(request, 'Los cambios se han aplicado directamente.')
             return redirect('contactos_admin')
 
@@ -217,9 +221,9 @@ class EditarContactoView(View):
             changes['cargo'] = {'old': contacto.cargo, 'new': cargo}
             contacto.cargo = cargo
 
-        if contacto.user_id != int(user_id):
-            changes['user_id'] = {'old': contacto.user_id, 'new': int(user_id)}
-            contacto.user_id = user_id
+        if contacto.user != usuario_contacto:  # Comprobamos si el usuario es diferente
+            changes['user'] = {'old': contacto.user.id, 'new': usuario_contacto.id}
+            contacto.user = usuario_contacto
 
         if changes:
             try:
@@ -237,6 +241,7 @@ class EditarContactoView(View):
             messages.info(request, 'No se detectaron cambios.')
 
         return redirect('contactos_admin')
+
 
 @method_decorator(login_required, name='dispatch')
 class EliminarContactoView(View):
