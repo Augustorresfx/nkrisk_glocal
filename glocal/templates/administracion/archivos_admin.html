@@ -1,0 +1,458 @@
+{% extends 'index_master.html' %}
+{% load static %}
+{% load filters %}
+{% block content %}
+<style>
+  /* Estilo base para el select */
+  .multi-select-pillbox {
+    width: 36em; /* Límite de ancho inicial para pantallas grandes */
+    padding: 0.5em; /* Espaciado interno para mejor apariencia */
+    box-sizing: border-box; /* Asegura que el padding no desborde el tamaño */
+  }
+  
+  /* Pantallas medianas (menos de 768px) */
+  @media (max-width: 768px) {
+    .multi-select-pillbox {
+      width: 28em; /* Ancho reducido para pantallas medianas */
+    }
+  }
+  
+  /* Pantallas pequeñas (menos de 400px) */
+  @media (max-width: 400px) {
+    .multi-select-pillbox {
+      width: 15em; /* Ancho aún más reducido para pantallas pequeñas */
+    }
+  }
+
+    /* Estilo base para el select */
+    .multi-select-pillbox-2 {
+    width: 36em; /* Límite de ancho inicial para pantallas grandes */
+    padding: 0.5em; /* Espaciado interno para mejor apariencia */
+    box-sizing: border-box; /* Asegura que el padding no desborde el tamaño */
+  }
+  
+  /* Pantallas medianas (menos de 768px) */
+  @media (max-width: 768px) {
+    .multi-select-pillbox-2 {
+      width: 28em; /* Ancho reducido para pantallas medianas */
+    }
+  }
+  
+  /* Pantallas pequeñas (menos de 400px) */
+  @media (max-width: 400px) {
+    .multi-select-pillbox-2 {
+      width: 15em; /* Ancho aún más reducido para pantallas pequeñas */
+    }
+  }
+  </style>
+
+    <!-- page content -->
+        <div class="right_col"  style="background-color:white;"role="main">
+          <h1 style="font-size:24px">Archivos</h1>
+
+      <!-- messages -->
+          {% if messages %}
+
+          {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger m-2 " role="alert">
+              {{ message }}
+            </div>
+            {% elif message.tags == 'success' %}
+            <div class="alert alert-success m-2" role="alert">
+              {{ message }}
+            </div>
+            {% else %}
+            <div class="alert alert-primary m-2" role="alert">
+              {{ message }}
+            </div>
+            {% endif %}
+          {% endfor %}
+  
+        {% endif %}
+
+      <!-- messages -->
+            <div class="row mb-4 m-0">
+              <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'brokers_admin' %}">
+              <div class="col-md-12 col-sm-12 m-0 p-0">
+                <div class="col-md-2 col-sm-4 m-0 p-0">
+                  <span></span>
+                  <div>
+                    <input name="nombre" id="nombre"  value="{{ filtros.nombre|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
+                  </div>
+                </div>
+                
+                <div class="col-md-2 col-sm-4 ">
+                  <span class="count_top">País</span>
+                  <div class="count">
+                    <select name="pais" id="pais" class="form-select form-control-sm col-md-8 col-sm-4" aria-label="Default select example">
+                      <option selected value="" >--Seleccione uno--</option>
+                      {% for pais in paises %}
+                      <option value="{{ pais.id }}" {% if filtros.pais == pais.id|stringformat:"s" %}selected{% endif %}>{{pais.nombre}}</option>
+                     {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col-md-2 col-sm-4 ">
+                    <span class="count_top">Categoria</span>
+                    <div class="count">
+                      <select name="categoria" id="categoria" class="form-select form-control-sm col-md-8 col-sm-4" aria-label="Default select example">
+                        <option selected value="" >--Seleccione una--</option>
+                        {% for categoria in categoriaes %}
+                        <option value="{{ categoria.id }}" {% if filtros.categoria == categoria.id|stringformat:"s" %}selected{% endif %}>{{categoria.nombre}}</option>
+                       {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Buscar</span>
+                  <div class="">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                      <i class="fa fa-search"></i>
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Botón Exportar -->
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Exportar</span>
+                  <div class="">
+                    <button type="submit" name="exportar" value="1" class="btn btn-outline-success btn-sm">
+                      <i class="fa fa-file-excel-o"></i>
+                      Exportar
+                    </button>
+                  </div>
+                </div>
+              </form>
+                <div class="col-md-2 col-sm-4">
+                  <span class="count_top" style="visibility: hidden;">Nuevo</span>
+                  <div class=""><!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#nuevo">
+                      <i class="fa fa-plus"></i>
+                      Nuevo
+                    </button>
+                    
+                   
+                    <!-- Modal creación -->
+                    <form method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                    <div class="modal fade" id="nuevo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Nuevo archivo</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            
+                            <div class="mb-3">
+                              <label for="nuevo_nombre" class="form-label">Nombre del archivo: </label>
+                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre del archivo" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-3">
+                              <label for="nuevo_archivo" class="form-label">Archivo: </label>
+                              <input name="nuevo_archivo" type="file" class="form-control" aria-label="Archivo" aria-describedby="basic-addon1">
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_pais" class="form-label">País: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_pais" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for pais in paises %}
+                                  <option value="{{pais.id}}">{{pais.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="mb-5">
+                                <span class="count_top">
+                                  <label for="nuevo_categoria" class="form-label">Categoria: </label></span>                              
+                                <span class="count_top"></span>
+                                <div class="count">
+                                  
+                                  <select name="nuevo_categoria" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                  
+                                  {% for categoria in categorias %}
+                                    <option value="{{categoria.id}}">{{categoria.nombre}}</option>
+                                   {% endfor %}
+                                  </select>
+                                </div>
+                              </div>
+
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_broker" class="form-label">Broker: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_broker" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for broker in brokers %}
+                                  <option value="{{broker.id}}">{{broker.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+
+                              <div class="mb-3">
+                                <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
+                              <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
+                              <input type="hidden" name="nuevo_activo" value="False">
+                              <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" >
+                              </div>
+
+                              </div>
+                              
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                  </div>
+                  
+                </div>
+                </div>
+            </div>
+       
+            <div class="row">
+              <div class="table" style="overflow: auto;">
+              
+                  <table class="table bg-white rounded shadow-sm">
+                      <thead class="bg-light">
+                        <tr>
+                            <th scope="col">Acciones</th>
+                          <th scope="col">Nombre</th>
+                          <th scope="col">Pais</th>
+                          <th scope="col">Categoria</th>
+                          <th scope="col">Fecha de subida</th>
+                          <th scope="col">Broker</th>
+                          <th scope="col">Activo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for archivo in pages %}
+                        
+                        <tr>
+                          <td>
+                             
+                            <div class="d-flex align-items-center" style="overflow: auto;">
+
+                                <!-- Botón para descargar el archivo -->
+                                <a href="{{ archivo.archivo.url }}" class="btn btn-link btn-lg p-0 border-0 mr-2 my-0" download>
+                                    <i class="fa fa-download text-success"></i>
+                                </a>
+                              <!-- Botón de Editar -->
+                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0" data-toggle="modal" data-target="#editarModal{{ archivo.id }}">
+                                <i class="fa fa-edit"></i>
+                              </button>
+                          
+                              <!-- Modal de edición -->
+                              <form method="post" action="{% url 'update_archivo' archivo.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="modal fade" id="editarModal{{ archivo.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Editar archivo</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <div class="mb-3">
+                                          <label for="editar_nombre" class="form-label">Nombre del archivo:</label>
+                                          <input name="editar_nombre" value="{{ archivo.nombre }}" type="text" class="form-control" aria-label="Nombre del archivo" aria-describedby="basic-addon1">
+                                        </div>
+
+                                        <div class="mb-5">
+                                          <div class="form-group">
+                                            <label for="pais">País</label>
+                                            <select class="form-control" id="editar_pais" name="editar_pais">
+                                              {% for pais in paises %}
+                                              <option value="{{ pais.id }}" {% if pais.id == archivo.pais.id %}selected{% endif %}>
+                                                {{ pais.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="form-group">
+                                            <label for="editar_categoria">Categoria</label>
+                                            <select class="form-control" id="editar_categoria" name="editar_categoria">
+                                              {% for categoria in categorias %}
+                                              <option value="{{ categoria.id }}" {% if categoria.id == archivo.categoria.id %}selected{% endif %}>
+                                                {{ categoria.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="form-group">
+                                            <label for="editar_broker">Broker</label>
+                                            <select class="form-control" id="editar_broker" name="editar_broker">
+                                              {% for broker in brokers %}
+                                              <option value="{{ broker.id }}" {% if broker.id == archivo.broker.id %}selected{% endif %}>
+                                                {{ broker.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="form-group">
+                                            <label for="activo">Activo</label>
+                                            <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if archivo.activo %}checked{% endif %}>
+                                          </div>
+                                     
+                                        </div>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </form>
+                          
+                              <!-- Botón de Eliminar -->
+                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_archivo' archivo.id %}">
+                                <i class="fa fa-trash-o text-danger"></i>
+                              </button>
+                            </div>
+                          </td>
+                          <td>{{ archivo.nombre }}</td>
+                          <td>{{ archivo.pais }}</td>
+                          <td>{{ archivo.categoria.nombre }}</td>
+                          <td>{{ archivo.fecha_ingreso }}</td>
+                          <td>{{ archivo.broker.nombre }}</td>
+
+                          {% if archivo.activo %}
+                          <td class="green">Si</td>
+  
+                          {% else %}
+                          <td class="red">No</td>
+  
+                          {% endif %}
+                          
+
+                          
+                        </tr>
+                       
+                    
+                        {% endfor %}
+                      </tbody>
+                  </table>
+              </div>  
+              <div class="app-table">
+              <div class="table-output">
+        <tbody id="table-body" class="table-body"> </tbody></div>
+            </div>
+          </div>
+           
+          <!-- PAGINACION -->
+           
+          <div class="mx-2">
+            <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+    
+    
+                {% if pages.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="{% my_url 1 'page' request.GET.urlencode %}">&laquo; primer página</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="{% my_url pages.previous_page_number 'page' request.GET.urlencode %}">anterior</a>
+                  </li>
+    
+                    {% endif %}
+          
+          
+                    <li class="page-item">
+                      
+                    <a class="page-link" href="{% my_url pages.number 'page' request.GET.urlencode %}">{{ pages.number }}</a>
+                  
+                   
+                    </li>
+                    <li class="page-item">
+                      
+                      <a class="page-link" href="{% my_url pages.paginator.num_pages 'page' request.GET.urlencode %}">{{ pages.paginator.num_pages }}</a>
+                    
+                     
+                      </li>
+                
+              
+           
+                {% if pages.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{% my_url pages.next_page_number 'page' request.GET.urlencode %}">siguiente</a>
+                 </li>
+                 <li class="page-item">
+                <a class="page-link" href="{% my_url pages.paginator.num_pages 'page' request.GET.urlencode %}">última página &raquo;</a>
+              </li>
+                {% endif %}
+              </ul>
+              </nav>
+       
+            </div>
+              <!--
+                MOVIMIENTOS
+              
+              <div class="">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                  <h2> 
+                    Flotas
+                  </h2>
+               
+        
+              </div>
+                
+                <div class="list-group overflow-auto" style="max-height: 360px;">
+                 
+                  {% for movimiento in movimientos %}
+                    <div  class="list-group-item">
+                      <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{movimiento.nombre_movimiento}}</h5>
+                        <div>
+                          <form method="POST" class="d-inline" action="{% url 'exportar_movimiento' flota.id movimiento.id %}">
+                            {% csrf_token %}
+                          <button type="submit" class="w-10 btn btn-sm btn-success exportar-excel mx-2">
+                            <span class="material-icons-outlined">
+                              file_download
+                              </span>
+                              
+                          </button>
+                        </form>
+                        <form method="POST" class="d-inline eliminar-formulario" action="{% url 'delete_movimiento' flota.id movimiento.id %}" id="eliminarFormulario">
+                          {% csrf_token %}
+                        <button type="button" class="w-10 btn btn-sm btn-danger eliminar-elemento confirmar-eliminar mx-2" onclick="confirmarEliminar()">
+                          <span class="material-icons-outlined">
+                            delete
+                            </span>
+                            
+                        </button>
+                      </form>
+        
+                        </div>
+                      </div>
+                      <p class="mb-1">{{movimiento.tipo_movimiento}}</p>
+                      
+                      <p class="mb-1">Creación: {{movimiento.created}}</p>
+                      
+                    </div>
+                  {% endfor %}
+                  
+                </div>
+              -->
+              </div>
+          </div>
+        <!-- /page content -->
+        <script src="{% static 'js/swal.js' %}"></script>
+{% endblock %}

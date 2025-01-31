@@ -582,9 +582,53 @@ class Archivo(models.Model):
     nombre = models.CharField(max_length=200)
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     broker = models.ForeignKey(Broker, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='usuario',)
     activo = models.BooleanField(default=False)
     archivo = models.FileField(upload_to="archivos/")
+    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_modificado',)
+
+    def save(self, *args, **kwargs):
+        # Verificar si se deben registrar cambios
+        track_changes = kwargs.pop("track_changes", True)
+
+        if self.pk and track_changes:  # Solo registrar cambios si es un objeto existente y se permite rastrear
+            original = self.__class__.objects.get(pk=self.pk)
+            changes = {}
+
+            for field in self._meta.fields:
+                field_name = field.name
+                original_value = getattr(original, field_name)
+                new_value = getattr(self, field_name)
+
+                # Manejar ForeignKey dinámicamente
+                if isinstance(field, models.ForeignKey):
+                    original_value = {
+                        "id": original_value.pk if original_value else None,
+                        "name": str(original_value) if original_value else None,
+                    }
+                    new_value = {
+                        "id": new_value.pk if new_value else None,
+                        "name": str(new_value) if new_value else None,
+                    }
+
+                # Comparar valores y registrar cambios
+                if original_value != new_value:
+                    changes[field_name] = {"old": original_value, "new": new_value}
+
+            # Crear un registro de cambios si hay diferencias
+            if changes:
+                from .models import PendingChange
+                if self.modified_by and isinstance(self.modified_by, User):
+                    PendingChange.objects.create(
+                        model_name=self._meta.model_name,
+                        object_id=self.pk,
+                        changes=changes,
+                        submitted_by=self.modified_by,
+                    )
+                else:
+                    raise ValueError("El campo 'modified_by' debe ser una instancia válida de User")
+
+        super().save(*args, **kwargs)  # Guardar el objeto normalmente
 
     def __str__(self):
         return self.nombre

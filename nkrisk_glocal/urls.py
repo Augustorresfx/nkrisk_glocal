@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from glocal.views import utils, matriz, broker, contacto, aseguradora, empresa
+from glocal.views import utils, matriz, broker, contacto, aseguradora, empresa, archivo
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -34,6 +34,11 @@ urlpatterns = [
     path('administracion/brokers/', broker.BrokerView.as_view(), name="brokers_admin"),
     path('administracion/brokers/<int:broker_id>/eliminar/', broker.EliminarBrokerView.as_view(), name='delete_broker'),
     path('administracion/brokers/<int:broker_id>/editar/', broker.EditarBrokerView.as_view(), name='update_broker'),
+    
+    # ARCHIVO
+    path('administracion/archivos/', archivo.ArchivoView.as_view(), name="archivos_admin"),
+    path('administracion/archivos/<int:archivo_id>/eliminar/', archivo.EliminarArchivoView.as_view(), name='delete_archivo'),
+    path('administracion/archivos/<int:archivo_id>/editar/', archivo.EditarArchivoView.as_view(), name='update_archivo'),
 
     # ASEGURADORAS
     path('administracion/aseguradoras/', aseguradora.AseguradoraView.as_view(), name="aseguradoras_admin"),

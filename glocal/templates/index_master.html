@@ -16,12 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
 
     <!-- Font Awesome -->
-    <link href="{% static '/FrWork/admin_lte/vendors/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
-    <!-- NProgress -->
-    <link href="{% static '/FrWork/admin_lte/vendors/nprogress/nprogress.css' %}" rel="stylesheet">
-    <!-- iCheck -->
-    <link href="{% static '/FrWork/admin_lte/vendors/iCheck/skins/flat/green.css' %}" rel="stylesheet">
-	
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- bootstrap-progressbar -->
     <link href="{% static '/FrWork/admin_lte/vendors/bootstrap-progressbar/css/bootstrap-progressbar-3.3.4.min.css' %}" rel="stylesheet">
 
@@ -74,10 +69,10 @@
                 <ul class="nav side-menu" style="font-size:14px;">
                   <li><a><i class="fa fa-object-group "></i> Resumen <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu" >
-                      <li><a href="/resumen/">Programa de seguros</a></li>
-                      <li><a href="/resumen/">Seguros</a></li>
-                      <li><a href="/resumen/">Brokers</a></li>
-                      <li><a href="/resumen/">Biblioteca</a></li>
+                      <li><a href="#">Programa de seguros</a></li>
+                      <li><a href="#">Seguros</a></li>
+                      <li><a href="#">Brokers</a></li>
+                      <li><a href="#">Archivos</a></li>
                     </ul>
                   </li>
                   <li><a><i class="fa fa-edit"></i> Administración <span class="fa fa-chevron-down"></span></a>
@@ -86,11 +81,11 @@
                       <li><a href="/administracion/aseguradoras">Aseguradora</a></li>
                       <li><a href="/administracion/empresas">Empresa</a></li>
                       <li><a href="/administracion/matrices">Grupo económico</a></li>
-                      <li><a href="/administracion/">Seguros</a></li>
+                      <li><a href="/administracion/seguros">Seguros</a></li>
                       <li><a href="/administracion/contactos">Contactos</a></li>
-                      <li><a href="/administracion/">Biblioteca</a></li>
+                      <li><a href="/administracion/archivos">Archivos</a></li>
                       <li><a href="/administracion/cambios_pendientes">Cambios pendientes</a></li>
-                      <li><a href="/administracion/">Eventos</a></li>
+                      {% comment %} <li><a href="/administracion/">Eventos</a></li> {% endcomment %}
                     </ul>
                   </li>
                   <li><a><i class="fa fa-shield"></i> Seguridad <span class="fa fa-chevron-down"></span></a>
@@ -208,14 +203,10 @@
     <script src="{% static '/FrWork/admin_lte/vendors/jquery/dist/jquery.min.js' %}"></script>
     <!-- Bootstrap -->
     <script src="{% static '/FrWork/admin_lte/vendors/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- FastClick -->
-    <script src="{% static '/FrWork/admin_lte/vendors/fastclick/lib/fastclick.js' %}"></script>
-    <!-- NProgress -->
-    <script src="{% static '/FrWork/admin_lte/vendors/nprogress/nprogress.js' %}"></script>
+
     <!-- Chart.js -->
     <script src="{% static '/FrWork/admin_lte/vendors/Chart.js/dist/Chart.min.js' %}"></script>
-    <!-- gauge.js -->
-    <script src="{% static '/FrWork/admin_lte/vendors/gauge.js/dist/gauge.min.js' %}"></script>
+
     <!-- bootstrap-progressbar -->
     <script src="{% static '/FrWork/admin_lte/vendors/bootstrap-progressbar/bootstrap-progressbar.min.js' %}"></script>
     <!-- Custom Theme Scripts -->

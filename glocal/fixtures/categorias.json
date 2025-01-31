@@ -1,0 +1,5 @@
+[
+    {"model": "glocal.Categoria", "pk": 1, "fields": {"nombre": "PDF"}},
+    {"model": "glocal.Categoria", "pk": 2, "fields": {"nombre": "Excel"}},
+    {"model": "glocal.Categoria", "pk": 3, "fields": {"nombre": "Docx"}}
+]
