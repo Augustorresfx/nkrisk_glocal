@@ -305,7 +305,9 @@
                           </td>
                           <td>{{ aseguradora.nombre }}</td>
                           <td>
+                            {% if aseguradora.logo %}
                             <img src="{{ aseguradora.logo.url }}" alt="{{ aseguradora.nombre }}" style="max-width: 100px; height: auto;">
+                            {% endif %}
                           </td>
                           <td>{{ aseguradora.pais }}</td>
                           <td>{{ aseguradora.ruc_nit }}</td>

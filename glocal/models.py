@@ -2,6 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from simple_history.models import HistoricalRecords
 from django.db.models import Sum
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+
+class CustomUser(AbstractUser):
+    nombre = models.CharField(max_length=50, blank=True, null=True)
+    apellido = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}" if self.nombre and self.apellido else self.username
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100)
@@ -26,7 +35,7 @@ class PendingChange(models.Model):
     model_name = models.CharField(max_length=255)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     changes = models.JSONField()
-    submitted_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     submitted_at = models.DateTimeField(auto_now_add=True)
     approved = models.BooleanField(null=True)
     action_type = models.CharField(max_length=10, choices=ACTION_CHOICES, default='edit')  # Campo adicional
@@ -39,7 +48,7 @@ class Siniestro(models.Model):
     vigencia_hasta = models.DateField(null=True, blank=True)
     monto = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
     activo = models.BooleanField(default=False)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Verificar si se deben registrar cambios
@@ -72,7 +81,7 @@ class Siniestro(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -96,8 +105,8 @@ class Contacto(models.Model):
     email = models.EmailField()
     telefono = models.CharField(max_length=25, blank=True, null=True)
     cargo = models.CharField(max_length=100, blank=True, null=True)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='contactos_modificados')
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='contactos')  # Opcional, vincula con un User
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='contactos_modificados')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='contactos')  # Opcional, vincula con un User
 
     def __str__(self):
         return self.nombre
@@ -133,7 +142,7 @@ class Contacto(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -149,7 +158,7 @@ class Matriz(models.Model):
     nombre = models.CharField(max_length=100)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
     activo = models.BooleanField(default=False)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Verificar si se deben registrar cambios
@@ -182,7 +191,7 @@ class Matriz(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -202,7 +211,7 @@ class Broker(models.Model):
     url_web = models.CharField(max_length=100)
     matriz = models.ForeignKey(Matriz, on_delete=models.CASCADE)
     activo = models.BooleanField(default=False)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     contactos = models.ManyToManyField(Contacto, related_name='broker')
 
     def save(self, *args, **kwargs):
@@ -236,7 +245,7 @@ class Broker(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -254,7 +263,7 @@ class Aseguradora(models.Model):
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
     ruc_nit = models.CharField(max_length=100)
     activo = models.BooleanField(default=False)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     contactos = models.ManyToManyField(Contacto, related_name='aseguradora')
 
     def save(self, *args, **kwargs):
@@ -288,7 +297,7 @@ class Aseguradora(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -306,7 +315,7 @@ class Empresa(models.Model):
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
     ruc_nit = models.CharField(max_length=100)
     activo = models.BooleanField(default=False)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     contactos = models.ManyToManyField(Contacto, related_name='empresa')
 
     def save(self, *args, **kwargs):
@@ -340,7 +349,7 @@ class Empresa(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -388,7 +397,7 @@ class Seguro(models.Model):
     prima_neta_emitida = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
     limite_asegurado = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
     activo = models.BooleanField(default=False)
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Verificar si se deben registrar cambios
@@ -421,7 +430,7 @@ class Seguro(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -478,7 +487,7 @@ class SeguroAccidentePersonal(Seguro):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,
@@ -582,10 +591,10 @@ class Archivo(models.Model):
     nombre = models.CharField(max_length=200)
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     broker = models.ForeignKey(Broker, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='usuario',)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='usuario',)
     activo = models.BooleanField(default=False)
     archivo = models.FileField(upload_to="archivos/")
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_modificado',)
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_modificado',)
 
     def save(self, *args, **kwargs):
         # Verificar si se deben registrar cambios
@@ -618,7 +627,7 @@ class Archivo(models.Model):
             # Crear un registro de cambios si hay diferencias
             if changes:
                 from .models import PendingChange
-                if self.modified_by and isinstance(self.modified_by, User):
+                if self.modified_by and isinstance(self.modified_by, settings.AUTH_USER_MODEL):
                     PendingChange.objects.create(
                         model_name=self._meta.model_name,
                         object_id=self.pk,

@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import redirect
-
+from django.conf import settings
+from django.contrib.auth import get_user_model
 # Importe Modelos
 from ..models import User, Contacto, PendingChange
 
@@ -49,8 +50,12 @@ class ContactoView(View):
         if exportar:
             return self.generar_excel_contactos(contactos)
 
+
+        # Obtener el modelo del usuario personalizado
+        user_custom = get_user_model()
+        print(user_custom)
         # Obtener la lista de usuarios
-        usuarios = User.objects.all()
+        usuarios = user_custom.objects.all()
         
         context = {
             'contactos': contactos,
@@ -72,8 +77,8 @@ class ContactoView(View):
         telefono = request.POST.get('nuevo_telefono')
         cargo = request.POST.get('nuevo_cargo')
         user_id = request.POST.get('nuevo_user')
-
-        usuario_contacto = get_object_or_404(User, id=user_id)
+        user_custom = get_user_model()
+        usuario_contacto = get_object_or_404(user_custom, id=user_id)
         user = request.user
 
         # Crear una solicitud de creación pendiente

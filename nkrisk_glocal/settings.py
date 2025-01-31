@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import dj_database_url
 from decouple import config
+from storages.backends.s3boto3 import S3Boto3Storage
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,7 +40,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # AWS S3 Settings
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default=None)
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default=None)
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default=None)
+AWS_STORAGE_BUCKET_NAME = "probandodocumentos2"
 AWS_S3_REGION_NAME = "us-west-1"
 AWS_QUERYSTRING_AUTH = False
 
@@ -113,6 +114,7 @@ WSGI_APPLICATION = 'nkrisk_glocal.wsgi.application'
 # Authentication
 LOGIN_URL = '/login/'
 
+AUTH_USER_MODEL = "glocal.CustomUser"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -161,41 +163,51 @@ USE_I18N = True
 
 USE_TZ = True
 
-MEDIA_URL = 'media/'
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
 AWS_S3_FILE_OVERWRITE = False
 
 STORAGES = {
-    # Archivos de medios (imágenes, PDFs, etc.)
+
+    # Media file (image) management  
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
     },
-    # Archivos estáticos
+   
+    # CSS and JS file management
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage" if DEBUG else "storages.backends.s3boto3.S3StaticStorage",
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
     },
 }
+
+# Archivos estáticos
+STATIC_URL = 'https://%s/' % AWS_S3_CUSTOM_DOMAIN
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+
+# Archivos de medios (imágenes, archivos cargados por usuarios)
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'glocal/static/'
+# STATIC_URL = 'glocal/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'glocal/static')
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'glocal/static')
+# ]
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
-    # in your application directory on Render.
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    # Turn on WhiteNoise storage backend that takes care of compressing static files
-    # and creating unique names for each version so they can safely be cached forever.
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    
+# STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
+# if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
+#     # in your application directory on Render.
+#     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+#     # Turn on WhiteNoise storage backend that takes care of compressing static files
+#     # and creating unique names for each version so they can safely be cached forever.
+#     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
