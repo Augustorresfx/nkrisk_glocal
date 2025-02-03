@@ -176,7 +176,7 @@ STORAGES = {
    
     # CSS and JS file management
     "staticfiles": {
-        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
@@ -188,15 +188,15 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'glocal/static/'
+STATIC_URL = '/glocal/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'glocal/static')
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+STATIC_ROOT = os.path.join(BASE_DIR, 'glocal/static_root')
 
-
-STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
     # in your application directory on Render.

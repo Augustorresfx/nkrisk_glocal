@@ -17,17 +17,18 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Border, Side
 from django.http import HttpResponse
 
-# ADMINISTRACION
+import boto3
+from django.conf import settings
+
 @method_decorator(login_required, name='dispatch')
 class ArchivoView(View):
     def get(self, request, *args, **kwargs):
-        
         # Obtener filtros desde los parámetros GET
         nombre_filtro = request.GET.get('nombre', '').strip()
         pais_filtro = request.GET.get('pais', '').strip()
         categoria_filtro = request.GET.get('categoria', '').strip()
         exportar = request.GET.get('exportar', None)
-        
+
         # Filtrar los archivos con base en los filtros 
         archivos = Archivo.objects.all()
 
@@ -39,7 +40,22 @@ class ArchivoView(View):
             
         if categoria_filtro:
             archivos = archivos.filter(categoria__id=categoria_filtro)
-    
+
+        # Generar URLs firmadas para los archivos
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+        )
+
+        for archivo in archivos:
+            if archivo.archivo:  # Verifica que el archivo exista
+                archivo.s3_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': archivo.archivo.name},
+                    ExpiresIn=3600  # La URL expira en 1 hora
+                )
+
         # Paginación
         archivos_paginados = Paginator(archivos, 30)
         page_number = request.GET.get("page")
@@ -51,13 +67,9 @@ class ArchivoView(View):
 
         # Obtener la lista de países
         paises = Pais.objects.all()
-
         matrices = Matriz.objects.all()
-
         contactos = Contacto.objects.all()
-        
         categorias = Categoria.objects.all()
-        
         brokers = Broker.objects.all()
 
         context = {
@@ -74,7 +86,7 @@ class ArchivoView(View):
             }
         }
         return render(request, 'administracion/archivos_admin.html', context)
-    
+
     def post(self, request, *args, **kwargs):
         # Obtener datos del formulario
         pais_id = request.POST.get('nuevo_pais')

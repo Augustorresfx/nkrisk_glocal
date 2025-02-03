@@ -400,9 +400,9 @@ class Seguro(models.Model):
     nro_poliza = models.IntegerField()
     vigencia_desde = models.DateField()
     vigencia_hasta = models.DateField(null=True, blank=True)
-    prima_neta_emitida = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
-    limite_asegurado = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
-    activo = models.BooleanField(default=False)
+    #prima_neta_emitida = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
+    #limite_asegurado = models.DecimalField(decimal_places=2, max_digits=100, null=True, blank=True)
+    #activo = models.BooleanField(default=False)
     modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):

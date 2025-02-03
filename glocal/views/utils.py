@@ -6,14 +6,27 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.http import HttpResponseServerError
+from django.http import HttpResponseServerError, JsonResponse
 from django.apps import apps
 from django.db import models
 
 # Importe Modelos
 from ..models import Pais, Matriz, Broker, Aseguradora, PendingChange
     
-    
+import boto3
+from django.conf import settings
+
+def obtener_url_firmada(request, archivo_path):
+    s3_client = boto3.client('s3',
+                             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+    url = s3_client.generate_presigned_url('get_object',
+                                           Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                                                   'Key': archivo_path},
+                                           ExpiresIn=3600)  # Expira en 1 hora
+
+    return JsonResponse({'url': url})
 # Usuarios / roles
 def is_admin(user):
     return user.is_superuser
