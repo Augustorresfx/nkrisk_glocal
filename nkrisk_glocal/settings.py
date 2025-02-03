@@ -167,6 +167,12 @@ AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 AWS_S3_FILE_OVERWRITE = False
 
+# Generación de URLs firmadas para archivos estáticos
+AWS_S3_SIGNATURE_VERSION = 's3v4'  # Importante para usar firmadas
+
+# La URL de los archivos estáticos en S3
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+
 STORAGES = {
 
     # Media file (image) management  
@@ -188,7 +194,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/glocal/static/'
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'glocal/static')

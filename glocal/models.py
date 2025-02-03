@@ -5,6 +5,8 @@ from django.db.models import Sum
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
+import boto3
+
 class CustomUser(AbstractUser):
     nombre = models.CharField(max_length=50, blank=True, null=True)
     apellido = models.CharField(max_length=50, blank=True, null=True)
@@ -600,6 +602,7 @@ class Archivo(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='usuario',)
     activo = models.BooleanField(default=False)
     archivo = models.FileField(upload_to="archivos/")
+    url_firmada = models.CharField(max_length=200, null=True, blank=True)
     modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_modificado',)
 
     def save(self, *args, **kwargs):
@@ -645,5 +648,16 @@ class Archivo(models.Model):
 
         super().save(*args, **kwargs)  # Guardar el objeto normalmente
 
+    def generar_url_firmada(self):
+            s3_client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+            )
+            return s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': self.archivo.name},
+                ExpiresIn=3600  # La URL expira en 1 hora
+            )
     def __str__(self):
         return self.nombre

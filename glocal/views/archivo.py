@@ -15,8 +15,7 @@ from ..models import Pais, Archivo, PendingChange, Matriz, Contacto, Broker, Cat
 # REPORTE
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Border, Side
-from django.http import HttpResponse
-
+from django.http import HttpResponse, JsonResponse
 import boto3
 from django.conf import settings
 
@@ -78,6 +77,61 @@ class ArchivoView(View):
             'paises': paises,
             'matrices': matrices,
             'contactos': contactos,
+            'categorias': categorias,
+            'brokers': brokers,
+            'filtros': {
+                'nombre': nombre_filtro,
+                'pais': pais_filtro,
+            }
+        }
+        return render(request, 'administracion/archivos_admin.html', context)
+
+# ADMINISTRACIÓN
+@method_decorator(login_required, name='dispatch')
+class ArchivoView(View):
+    def get(self, request, *args, **kwargs):
+        # Obtener filtros desde los parámetros GET
+        nombre_filtro = request.GET.get('nombre', '').strip()
+        pais_filtro = request.GET.get('pais', '').strip()
+        categoria_filtro = request.GET.get('categoria', '').strip()
+        exportar = request.GET.get('exportar', None)
+        
+        # Filtrar los archivos con base en los filtros 
+        archivos = Archivo.objects.all()
+
+        if nombre_filtro:
+            archivos = archivos.filter(nombre__icontains=nombre_filtro)
+
+        if pais_filtro:
+            archivos = archivos.filter(pais__id=pais_filtro)
+            
+        if categoria_filtro:
+            archivos = archivos.filter(categoria__id=categoria_filtro)
+        
+        # Generar las URLs firmadas para cada archivo
+        for archivo in archivos:
+            archivo.url_firmada = archivo.generar_url_firmada()  # Asignar la URL firmada
+
+        # Paginación
+        archivos_paginados = Paginator(archivos, 30)
+        page_number = request.GET.get("page")
+        filter_pages = archivos_paginados.get_page(page_number)
+
+        # Si se solicita exportar, generar el archivo Excel
+        if exportar:
+            return self.generar_excel_archivos(archivos)
+
+        # Obtener la lista de países
+        paises = Pais.objects.all()
+
+        # Obtener categorías y brokers
+        categorias = Categoria.objects.all()
+        brokers = Broker.objects.all()
+
+        context = {
+            'archivos': archivos,
+            'pages': filter_pages,
+            'paises': paises,
             'categorias': categorias,
             'brokers': brokers,
             'filtros': {
