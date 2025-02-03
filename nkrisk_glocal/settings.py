@@ -195,7 +195,7 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'glocal/static_root')
 
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
