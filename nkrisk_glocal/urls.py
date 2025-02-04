@@ -26,9 +26,9 @@ urlpatterns = [
     path('inicio/', utils.InicioView.as_view(), name='inicio'),
     
     # MATRICES
-    path('administracion/matrices/', matriz.MatrizView.as_view(), name="matrices_admin"),
-    path('administracion/matrices/<int:matriz_id>/eliminar/', matriz.EliminarMatrizView.as_view(), name='delete_matriz'),
-    path('administracion/matrices/<int:matriz_id>/editar/', matriz.EditarMatrizView.as_view(), name='update_matriz'),
+    path('administracion/grupos_economicos/', matriz.MatrizView.as_view(), name="matrices_admin"),
+    path('administracion/grupos_economicos/<int:matriz_id>/eliminar/', matriz.EliminarMatrizView.as_view(), name='delete_matriz'),
+    path('administracion/grupos_economicos/<int:matriz_id>/editar/', matriz.EditarMatrizView.as_view(), name='update_matriz'),
     
     # BROKERS
     path('administracion/brokers/', broker.BrokerView.as_view(), name="brokers_admin"),

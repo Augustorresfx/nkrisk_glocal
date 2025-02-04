@@ -61,68 +61,7 @@
                     </button>
                   </div>
                 </div>
-                <div class="col-md-2 col-sm-4">
-                  <span class="count_top" style="visibility: hidden;">Nuevo</span>
-                  <div class=""><!-- Button trigger modal -->
-                    <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#nuevo">
-                      <i class="fa fa-plus"></i>
-                      Nuevo
-                    </button>
-                    
-                   
-                    <!-- Modal -->
-                    <form method="post" enctype="multipart/form-data">
-                      {% csrf_token %}
-                    <div class="modal fade" id="nuevo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Nueva matriz</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
-                          </div>
-                          <div class="modal-body">
-                            
-                            <div class="mb-3">
-                              <label for="nuevo_nombre" class="form-label">Nombre de la matriz: </label>
-                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre de la matriz" aria-describedby="basic-addon1">
-                            </div>
-                            <div class="mb-5">
-                              <span class="count_top">
-                                <label for="nuevo_pais" class="form-label">País: </label></span>                              
-                              <span class="count_top"></span>
-                              <div class="count">
-                                
-                                <select name="nuevo_pais" class="form-select form-control-sm col-md-12" aria-label="Default select example">
-                                
-                                {% for pais in paises %}
-                                  <option value="{{pais.id}}">{{pais.nombre}}</option>
-                                 {% endfor %}
-                                </select>
-                              </div>
-                            </div>
-                              
-                              <div class="mb-3">
-                                <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
-                              <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
-                              <input type="hidden" name="nuevo_activo" value="False">
-                              <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" value="on" {% if matriz.activo %}checked{% endif %}>
 
-                              </div>
-                              </div>
-                              
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                  </div>
-                  
-                </div>
                 </div>
             </div>
             <div class="row">

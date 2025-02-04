@@ -105,7 +105,7 @@ class MatrizView(View):
         # Crear un nuevo archivo Excel
         workbook = openpyxl.Workbook()
         sheet = workbook.active
-        sheet.title = "Matrices"
+        sheet.title = "Grupos económicos"
 
         # Estilos
         font_header = Font(name="Calibri", size=12, bold=True, color="FFFFFF")
@@ -143,7 +143,7 @@ class MatrizView(View):
         response = HttpResponse(
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        response["Content-Disposition"] = 'attachment; filename="matrices.xlsx"'
+        response["Content-Disposition"] = 'attachment; filename="grupos_economicos.xlsx"'
         workbook.save(response)
         workbook.close()
         return response

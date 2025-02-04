@@ -599,6 +599,8 @@ class Archivo(models.Model):
     nombre = models.CharField(max_length=200)
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     broker = models.ForeignKey(Broker, on_delete=models.CASCADE)
+    aseguradora = models.ForeignKey(Aseguradora, on_delete=models.CASCADE)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='usuario',)
     activo = models.BooleanField(default=False)
     archivo = models.FileField(upload_to="archivos/")

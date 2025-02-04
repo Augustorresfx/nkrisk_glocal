@@ -10,7 +10,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.shortcuts import get_list_or_404
 
 # Importe Modelos
-from ..models import Pais, Archivo, PendingChange, Matriz, Contacto, Broker, Categoria
+from ..models import Pais, Empresa, Archivo, Aseguradora, PendingChange, Matriz, Contacto, Broker, Categoria
 
 # REPORTE
 import openpyxl
@@ -70,6 +70,8 @@ class ArchivoView(View):
         contactos = Contacto.objects.all()
         categorias = Categoria.objects.all()
         brokers = Broker.objects.all()
+        empresas = Empresa.objects.all()
+        aseguradoras = Aseguradora.objects.all()
 
         context = {
             'archivos': archivos,
@@ -79,61 +81,8 @@ class ArchivoView(View):
             'contactos': contactos,
             'categorias': categorias,
             'brokers': brokers,
-            'filtros': {
-                'nombre': nombre_filtro,
-                'pais': pais_filtro,
-            }
-        }
-        return render(request, 'administracion/archivos_admin.html', context)
-
-# ADMINISTRACIÓN
-@method_decorator(login_required, name='dispatch')
-class ArchivoView(View):
-    def get(self, request, *args, **kwargs):
-        # Obtener filtros desde los parámetros GET
-        nombre_filtro = request.GET.get('nombre', '').strip()
-        pais_filtro = request.GET.get('pais', '').strip()
-        categoria_filtro = request.GET.get('categoria', '').strip()
-        exportar = request.GET.get('exportar', None)
-        
-        # Filtrar los archivos con base en los filtros 
-        archivos = Archivo.objects.all()
-
-        if nombre_filtro:
-            archivos = archivos.filter(nombre__icontains=nombre_filtro)
-
-        if pais_filtro:
-            archivos = archivos.filter(pais__id=pais_filtro)
-            
-        if categoria_filtro:
-            archivos = archivos.filter(categoria__id=categoria_filtro)
-        
-        # Generar las URLs firmadas para cada archivo
-        for archivo in archivos:
-            archivo.url_firmada = archivo.generar_url_firmada()  # Asignar la URL firmada
-
-        # Paginación
-        archivos_paginados = Paginator(archivos, 30)
-        page_number = request.GET.get("page")
-        filter_pages = archivos_paginados.get_page(page_number)
-
-        # Si se solicita exportar, generar el archivo Excel
-        if exportar:
-            return self.generar_excel_archivos(archivos)
-
-        # Obtener la lista de países
-        paises = Pais.objects.all()
-
-        # Obtener categorías y brokers
-        categorias = Categoria.objects.all()
-        brokers = Broker.objects.all()
-
-        context = {
-            'archivos': archivos,
-            'pages': filter_pages,
-            'paises': paises,
-            'categorias': categorias,
-            'brokers': brokers,
+            'aseguradoras': aseguradoras,
+            'empresas': empresas,
             'filtros': {
                 'nombre': nombre_filtro,
                 'pais': pais_filtro,
@@ -147,6 +96,8 @@ class ArchivoView(View):
         categoria_id = request.POST.get('nuevo_categoria')
         nombre = request.POST.get('nuevo_nombre')
         broker_id = request.POST.get('nuevo_broker')
+        aseguradora_id = request.POST.get('nuevo_aseguradora')
+        empresa_id = request.POST.get('nuevo_empresa')
         activo = request.POST.get('nuevo_activo')
         archivo_ingresado = request.FILES.get('nuevo_archivo')
 
@@ -158,6 +109,8 @@ class ArchivoView(View):
         pais = get_object_or_404(Pais, id=pais_id)
         broker = get_object_or_404(Broker, id=broker_id)
         categoria = get_object_or_404(Categoria, id=categoria_id)
+        aseguradora = get_object_or_404(Aseguradora, id=aseguradora_id)
+        empresa = get_object_or_404(Empresa, id=empresa_id)
 
         user = request.user
         
@@ -169,6 +122,8 @@ class ArchivoView(View):
             'pais_id': {'new': pais.id},
             'categoria_id': {'new': categoria.id},
             'broker_id': {'new': broker.id},
+            'aseguradora_id': {'new': aseguradora.id},
+            'empresa_id': {'new': empresa.id},
             'usuario_id': {'new': user.id},
             'activo': {'new': activo},
         }
@@ -181,6 +136,8 @@ class ArchivoView(View):
                     nombre=nombre,
                     categoria=categoria,
                     broker=broker,
+                    aseguradora=aseguradora,
+                    empresa=empresa,
                     usuario=user,
                     activo=activo,
                     archivo=archivo_ingresado,
@@ -223,7 +180,7 @@ class ArchivoView(View):
         )
 
         # Encabezados
-        encabezados = ["Nombre", "País", "Oficina", "Web", "Matriz", "Activo", "Contactos"]
+        encabezados = ["Nombre", "País", "Oficina", "Web", "Grupo económico", "Broker", "Aseguradora", "Empresa", "Activo", "Contactos"]
         for col_num, header in enumerate(encabezados, start=1):
             cell = sheet.cell(row=1, column=col_num, value=header)
             cell.font = font_header
@@ -251,15 +208,27 @@ class ArchivoView(View):
             # Columna 5: Matriz
             cell_matriz = sheet.cell(row=row_num, column=5, value=archivo.matriz.nombre)
             cell_matriz.border = bordes
+            
+            # Columna 6: Broker
+            cell_matriz = sheet.cell(row=row_num, column=6, value=archivo.broker.nombre)
+            cell_matriz.border = bordes
+            
+            # Columna 7: Aseguradora
+            cell_matriz = sheet.cell(row=row_num, column=7, value=archivo.aseguradora.nombre)
+            cell_matriz.border = bordes
+            
+            # Columna 8: Empresa
+            cell_matriz = sheet.cell(row=row_num, column=8, value=archivo.empresa.nombre)
+            cell_matriz.border = bordes
 
-            # Columna 6: Activo
-            cell_activo = sheet.cell(row=row_num, column=6, value="SI" if archivo.activo else "NO")
+            # Columna 9: Activo
+            cell_activo = sheet.cell(row=row_num, column=9, value="SI" if archivo.activo else "NO")
             cell_activo.border = bordes
 
-            # Columna 7: Contactos
+            # Columna 10: Contactos
             # Obtener nombres de contactos separados por comas
             contactos_nombres = ", ".join(contacto.nombre for contacto in archivo.contactos.all())
-            sheet.cell(row=row_num, column=7, value=contactos_nombres).border = bordes
+            sheet.cell(row=row_num, column=10, value=contactos_nombres).border = bordes
 
         # Crear la respuesta HTTP
         response = HttpResponse(
@@ -278,6 +247,8 @@ class EditarArchivoView(View):
         categoria_id = request.POST.get('editar_categoria')
         nombre = request.POST.get('editar_nombre')
         broker_id = request.POST.get('editar_broker')
+        aseguradora_id = request.POST.get('editar_aseguradora')
+        empresa_id = request.POST.get('editar_empresa')
         activo = 'editar_activo' in request.POST
         
         # Obtener objetos relacionados
@@ -285,6 +256,8 @@ class EditarArchivoView(View):
         pais = get_object_or_404(Pais, id=pais_id)
         categoria = get_object_or_404(Categoria, id=categoria_id)
         broker = get_object_or_404(Broker, id=broker_id)
+        aseguradora = get_object_or_404(Aseguradora, id=aseguradora_id)
+        empresa = get_object_or_404(Empresa, id=empresa_id)
         user = request.user
 
         # Si el usuario es superuser, aplicar los cambios directamente
@@ -299,6 +272,11 @@ class EditarArchivoView(View):
                 archivo.broker_id = broker_id
             if archivo.categoria_id != int(categoria_id):
                 archivo.categoria_id = categoria_id
+                
+            if archivo.aseguradora_id != int(aseguradora_id):
+                archivo.aseguradora_id = aseguradora_id
+            if archivo.empresa_id != int(empresa_id):
+                archivo.empresa_id = empresa_id
             if archivo.activo != activo:
                 archivo.activo = activo
 
@@ -321,8 +299,15 @@ class EditarArchivoView(View):
                 changes['broker_id'] = {'old': archivo.broker_id, 'new': int(broker_id)}
                 archivo.broker_id = broker_id
                 
-                
-            if archivo.categoria_id != int(broker_id):
+            if archivo.aseguradora_id != int(aseguradora_id):
+                changes['aseguradora_id'] = {'old': archivo.aseguradora_id, 'new': int(aseguradora_id)}
+                archivo.aseguradora_id = aseguradora_id
+            
+            if archivo.empresa_id != int(empresa_id):
+                changes['empresa_id'] = {'old': archivo.empresa_id, 'new': int(empresa_id)}
+                archivo.empresa_id = empresa_id
+                   
+            if archivo.categoria_id != int(categoria_id):
                 changes['categoria_id'] = {'old': archivo.categoria_id, 'new': int(categoria_id)}
                 archivo.categoria_id = categoria_id
 

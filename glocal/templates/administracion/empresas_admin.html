@@ -160,7 +160,7 @@
                             </div>
                             <div class="mb-5">
                               <span class="count_top">
-                                <label for="nuevo_matriz" class="form-label">Matriz: </label></span>                              
+                                <label for="nuevo_matriz" class="form-label">Grupo económico: </label></span>                              
                               <span class="count_top"></span>
                               <div class="count">
                                 
@@ -220,7 +220,7 @@
                           <th scope="col">Nombre</th>
                           <th scope="col">País</th>
                           <th scope="col">RUC / NIT</th>
-                          <th scope="col">Matriz</th>
+                          <th scope="col">Grupo económico</th>
                           <th scope="col">Activo</th>
                           <th scope="col">Contactos</th>
                         </tr>
@@ -266,7 +266,7 @@
                                             </select>
                                           </div>
                                           <div class="form-group">
-                                            <label for="editar_matriz">Matriz</label>
+                                            <label for="editar_matriz">Grupo económico</label>
                                             <select class="form-control" id="editar_matriz" name="editar_matriz">
                                               {% for matriz in matrices %}
                                               <option value="{{ matriz.id }}" {% if matriz.id == empresa.matriz.id %}selected{% endif %}>

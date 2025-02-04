@@ -201,7 +201,34 @@
                                 </select>
                               </div>
                             </div>
-
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_aseguradora" class="form-label">Aseguradora: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_aseguradora" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for aseguradora in aseguradoras %}
+                                  <option value="{{aseguradora.id}}">{{aseguradora.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_empresa" class="form-label">Empresa: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_empresa" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for empresa in empresas %}
+                                  <option value="{{empresa.id}}">{{empresa.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
                               <div class="mb-3">
                                 <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
                               <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
@@ -237,6 +264,8 @@
                           <th scope="col">Categoria</th>
                           <th scope="col">Fecha de subida</th>
                           <th scope="col">Broker</th>
+                          <th scope="col">Aseguradora</th>
+                          <th scope="col">Empresa</th>
                           <th scope="col">Activo</th>
                         </tr>
                       </thead>
@@ -307,6 +336,26 @@
                                             </select>
                                           </div>
                                           <div class="form-group">
+                                            <label for="editar_aseguradora">Aseguradora</label>
+                                            <select class="form-control" id="editar_aseguradora" name="editar_aseguradora">
+                                              {% for aseguradora in aseguradoras %}
+                                              <option value="{{aseguradora.id }}" {% if aseguradora.id == archivo.aseguradora.id %}selected{% endif %}>
+                                                {{ aseguradora.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="form-group">
+                                            <label for="editar_empresa">Empresa</label>
+                                            <select class="form-control" id="editar_empresa" name="editar_empresa">
+                                              {% for empresa in empresas %}
+                                              <option value="{{ empresa.id }}" {% if empresa.id == archivo.empresa.id %}selected{% endif %}>
+                                                {{ empresa.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+                                          <div class="form-group">
                                             <label for="activo">Activo</label>
                                             <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if archivo.activo %}checked{% endif %}>
                                           </div>
@@ -333,7 +382,9 @@
                           <td>{{ archivo.categoria.nombre }}</td>
                           <td>{{ archivo.fecha_ingreso }}</td>
                           <td>{{ archivo.broker.nombre }}</td>
-
+                          <td>{{ archivo.aseguradora.nombre }}</td>
+                          <td>{{ archivo.empresa.nombre }}</td>
+                          
                           {% if archivo.activo %}
                           <td class="green">Si</td>
   
