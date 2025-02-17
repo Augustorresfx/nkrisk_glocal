@@ -109,6 +109,7 @@ class ArchivoView(View):
         pais = get_object_or_404(Pais, id=pais_id)
         broker = get_object_or_404(Broker, id=broker_id)
         categoria = get_object_or_404(Categoria, id=categoria_id)
+        
         aseguradora = get_object_or_404(Aseguradora, id=aseguradora_id)
         empresa = get_object_or_404(Empresa, id=empresa_id)
 

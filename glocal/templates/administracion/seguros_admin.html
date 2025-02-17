@@ -47,7 +47,7 @@
 
     <!-- page content -->
         <div class="right_col"  style="background-color:white;"role="main">
-          <h1 style="font-size:24px">Brokers</h1>
+          <h1 style="font-size:24px">Seguros</h1>
 
       <!-- messages -->
           {% if messages %}
@@ -74,13 +74,7 @@
             <div class="row mb-4 m-0">
               <form class="col-md-12 col-sm-12 m-0 p-0" method="get" action="{% url 'brokers_admin' %}">
               <div class="col-md-12 col-sm-12 m-0 p-0">
-                <div class="col-md-2 col-sm-4 m-0 p-0">
-                  <span>Nombre</span>
-                  <div >
-                    <input name="nombre" id="nombre"  value="{{ filtros.nombre|default:'' }}"  type="text" class="form-control form-control-sm col-md-8 col-sm-4">
-                  </div>
-                </div>
-                
+            
                 <div class="col-md-2 col-sm-4 ">
                   <span class="count_top">País</span>
                   <div class="count">
@@ -119,21 +113,13 @@
                       <div class="modal-dialog" role="document">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Nuevo broker</h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Nuevo seguro</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                             </button>
                           </div>
                           <div class="modal-body">
                             
-                            <div class="mb-3">
-                              <label for="nuevo_nombre" class="form-label">Nombre del broker: </label>
-                              <input name="nuevo_nombre" type="text" class="form-control" aria-label="Nombre del broker" aria-describedby="basic-addon1">
-                            </div>
-                            <div class="mb-3">
-                              <label for="nuevo_logo" class="form-label">Logo del broker: </label>
-                              <input name="nuevo_logo" type="file" class="form-control" aria-label="Logo del broker" aria-describedby="basic-addon1">
-                            </div>
                             <div class="mb-5">
                               <span class="count_top">
                                 <label for="nuevo_pais" class="form-label">País: </label></span>                              
@@ -147,14 +133,6 @@
                                  {% endfor %}
                                 </select>
                               </div>
-                            </div>
-                            <div class="mb-3">
-                              <label for="nuevo_domicilio" class="form-label">Oficina del broker: </label>
-                              <input name="nuevo_domicilio" type="text" class="form-control" aria-label="Oficina del broker" aria-describedby="basic-addon1">
-                            </div>
-                            <div class="mb-3">
-                              <label for="nuevo_web" class="form-label">URL web del broker: </label>
-                              <input name="nuevo_web" type="text" class="form-control" aria-label="URL web del broker" aria-describedby="basic-addon1">
                             </div>
                             <div class="mb-5">
                               <span class="count_top">
@@ -170,26 +148,87 @@
                                 </select>
                               </div>
                             </div>
-
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_empresa" class="form-label">Empresa: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_empresa" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for empresa in empresas %}
+                                  <option value="{{empresa.id}}">{{empresa.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_broker" class="form-label">Broker: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_broker" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for broker in brokers %}
+                                  <option value="{{broker.id}}">{{broker.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                  <label for="nuevo_moneda" class="form-label">Moneda: </label>
+                              </span>
+                              <span class="count_top"></span>
+                              <div class="count">
+                                  <select name="nuevo_moneda" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                      {% for value, label in MONEDA_CHOICES %}
+                                          <option value="{{ value }}">{{ label }}</option>
+                                      {% endfor %}
+                                  </select>
+                              </div>
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                <label for="nuevo_aseguradora" class="form-label">Aseguradora: </label></span>                              
+                              <span class="count_top"></span>
+                              <div class="count">
+                                
+                                <select name="nuevo_aseguradora" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                
+                                {% for aseguradora in aseguradoras %}
+                                  <option value="{{aseguradora.id}}">{{aseguradora.nombre}}</option>
+                                 {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="mb-5">
+                              <span class="count_top">
+                                  <label for="nuevo_tipo_seguro" class="form-label">Tipo: </label>
+                              </span>
+                              <span class="count_top"></span>
+                              <div class="count">
+                                  <select name="nuevo_tipo_seguro" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                      {% for value, label in TIPO_CHOICES %}
+                                          <option value="{{ value }}">{{ label }}</option>
+                                      {% endfor %}
+                                  </select>
+                              </div>
+                            </div>
                               <div class="mb-3">
-                                <label for="nuevo_activo" class="form-label mt-1">Activo: </label>
-                              <!-- Campo oculto que garantiza que siempre se envíe el valor de 'activo' -->
-                              <input type="hidden" name="nuevo_activo" value="False">
-                              <input type="checkbox" name="nuevo_activo" id="nuevo_activo" class="form-check-input mt-2 ml-2" >
+                                <label for="nuevo_nro_poliza" class="form-label">Número de póliza: </label>
+                                <input name="nuevo_nro_poliza" type="text" class="form-control" aria-label="Número de póliza" aria-describedby="basic-addon1">
                               </div>
 
-                              <div class="mb-5">
-                                <span class="count_top">
-                                  <label for="nuevo_contactos" class="form-label">Contactos: </label></span>                              
-                                <span class="count_top"></span>
-                                <div class="count">
-                                  
-                                  <select name="nuevo_contacto" id="multi_select_propio_2" class="multi-select-pillbox" multiple="multiple">
-                                    {% for contacto in contactos %}
-                                    <option value="{{contacto.id}}">{{contacto.nombre}}</option>
-                                   {% endfor %}
-                                </select>
-                                </div>
+                              <div class="mb-3">
+                                <label for="nuevo_vigencia_desde" class="form-label">Vigencia Desde:</label>
+                                <input type="date" class="form-control" id="nuevo_vigencia_desde" name="nuevo_vigencia_desde" required>
+                              </div>
+                              
+                              <div class="mb-3">
+                                  <label for="nuevo_vigencia_hasta" class="form-label">Vigencia Hasta:</label>
+                                  <input type="date" class="form-control" id="nuevo_vigencia_hasta" name="nuevo_vigencia_hasta">
                               </div>
 
                               </div>
@@ -215,58 +254,48 @@
                       <thead class="bg-light">
                         <tr>
                           <th scope="col">Acciones</th>
-                          <th scope="col">Nombre</th>
-                          <th scope="col">Logo</th>
                           <th scope="col">País</th>
-                          <th scope="col">Domicilio</th>
-                          <th scope="col">Url web</th>
                           <th scope="col">Grupo económico</th>
-                          <th scope="col">Activo</th>
-                          <th scope="col">Contactos</th>
+                          <th scope="col">Empresa</th>
+                          <th scope="col">Broker</th>
+                          <th scope="col">Moneda</th>
+                          <th scope="col">Aseguradora</th>
+                          <th scope="col">Tipo</th>
+                          <th scope="col">N° de póliza</th>
+                          <th scope="col">Vigencia desde</th>
+                          <th scope="col">Vigencia hasta</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {% for broker in pages %}
+                        {% for seguro in pages %}
                         
                         <tr>
                           <td>
                             <div class="d-flex align-items-center" style="overflow: auto;">
                               <!-- Botón de Editar -->
-                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ broker.id }}">
+                              <button type="button" class="btn btn-link btn-lg p-0 border-0 my-0 mr-2" data-toggle="modal" data-target="#editarModal{{ seguro.id }}">
                                 <i class="fa fa-edit"></i>
                               </button>
                           
                               <!-- Modal de edición -->
-                              <form method="post" action="{% url 'update_broker' broker.id %}" enctype="multipart/form-data">
+                              <form method="post" action="{% url 'update_seguro' seguro.id %}" enctype="multipart/form-data">
                                 {% csrf_token %}
-                                <div class="modal fade" id="editarModal{{ broker.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                                <div class="modal fade" id="editarModal{{ seguro.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
                                   <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Editar broker</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Editar seguro</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                           <span aria-hidden="true">&times;</span>
                                         </button>
                                       </div>
                                       <div class="modal-body">
-                                        <div class="mb-3">
-                                          <label for="editar_nombre" class="form-label">Nombre del broker:</label>
-                                          <input name="editar_nombre" value="{{ broker.nombre }}" type="text" class="form-control" aria-label="Nombre del broker" aria-describedby="basic-addon1">
-                                        </div>
-                                        <div class="mb-3">
-                                          <label for="editar_logo" class="form-label">Logo del broker:</label>
-                                          <input name="editar_logo" type="file" class="form-control" aria-label="Logo del broker" aria-describedby="basic-addon1">
-                                          <!-- Si hay un logo, mostrar la imagen actual -->
-                                          {% if broker.logo %}
-                                            <img src="{{ broker.logo.url }}" alt="Logo actual" style="max-width: 150px; margin-top: 10px;">
-                                          {% endif %}
-                                        </div>
                                         <div class="mb-5">
                                           <div class="form-group">
                                             <label for="pais">País</label>
                                             <select class="form-control" id="editar_pais" name="editar_pais">
                                               {% for pais in paises %}
-                                              <option value="{{ pais.id }}" {% if pais.id == broker.pais.id %}selected{% endif %}>
+                                              <option value="{{ pais.id }}" {% if pais.id == seguro.pais.id %}selected{% endif %}>
                                                 {{ pais.nombre }}
                                               </option>
                                               {% endfor %}
@@ -276,39 +305,92 @@
                                             <label for="editar_matriz">Grupo económico</label>
                                             <select class="form-control" id="editar_matriz" name="editar_matriz">
                                               {% for matriz in matrices %}
-                                              <option value="{{ matriz.id }}" {% if matriz.id == broker.matriz.id %}selected{% endif %}>
+                                              <option value="{{ matriz.id }}" {% if matriz.id == seguro.matriz.id %}selected{% endif %}>
                                                 {{ matriz.nombre }}
                                               </option>
                                               {% endfor %}
                                             </select>
                                           </div>
-                                          <div class="mb-3">
-                                            <label for="editar_domicilio" class="form-label">Oficina del broker:</label>
-                                            <input name="editar_domicilio" value="{{ broker.domicilio_oficina }}" type="text" class="form-control" aria-label="Oficina del broker" aria-describedby="basic-addon1">
-                                          </div>
-                                          <div class="mb-3">
-                                            <label for="editar_web" class="form-label">Url web del broker:</label>
-                                            <input name="editar_web" value="{{ broker.url_web }}" type="text" class="form-control" aria-label="Url web del broker" aria-describedby="basic-addon1">
+                                          <div class="form-group">
+                                            <label for="editar_empresa">Empresa</label>
+                                            <select class="form-control" id="editar_empresa" name="editar_empresa">
+                                              {% for empresa in empresas %}
+                                              <option value="{{ empresa.id }}" {% if empresa.id == seguro.empresa.id %}selected{% endif %}>
+                                                {{ empresa.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
                                           </div>
                                           <div class="form-group">
-                                            <label for="activo">Activo</label>
-                                            <input type="checkbox" name="editar_activo" id="editar_activo" class="form-check-input mt-2 ml-2" value="on" {% if broker.activo %}checked{% endif %}>
+                                            <label for="editar_broker">Broker</label>
+                                            <select class="form-control" id="editar_broker" name="editar_broker">
+                                              {% for broker in brokers %}
+                                              <option value="{{ broker.id }}" {% if broker.id == seguro.broker.id %}selected{% endif %}>
+                                                {{ broker.nombre }}
+                                              </option>
+                                              {% endfor %}
+                                            </select>
+                                          </div>
+
+                                          <div class="mb-5">
+                                            <span class="count_top">
+                                                <label for="editar_moneda" class="form-label">Moneda: </label>
+                                            </span>
+                                            <span class="count_top"></span>
+                                            <div class="count">
+                                                <select name="editar_moneda" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                                    {% for value, label in MONEDA_CHOICES %}
+                                                        <option value="{{ value }}" {% if value == seguro.moneda %}selected{% endif %}>
+                                                          {{ label }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
                                           </div>
                                           <div class="mb-5">
                                             <span class="count_top">
-                                              <label for="editar_contacto" class="form-label">Contactos: </label></span>                              
+                                              <label for="editar_aseguradora" class="form-label">Aseguradora: </label></span>                              
                                             <span class="count_top"></span>
                                             <div class="count">
                                               
-                                              <select name="editar_contacto" id="multi_select_edicion" class="multi-select-pillbox-2" multiple="multiple">
-                                                {% for contacto in contactos %}
-                                                    <option value="{{ contacto.id }}" {% if contacto in broker.contactos.all %}selected{% endif %}>
-                                                        {{ contacto.nombre }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
+                                              <select name="editar_aseguradora" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                              
+                                              {% for aseguradora in aseguradoras %}
+                                                <option value="{{aseguradora.id}}"  {% if aseguradora.id == seguro.aseguradora.id %}selected{% endif %}>
+                                                  {{aseguradora.nombre}}</option>
+                                               {% endfor %}
+                                              </select>
                                             </div>
                                           </div>
+                                          <div class="mb-5">
+                                            <span class="count_top">
+                                                <label for="editar_tipo_seguro" class="form-label">Tipo: </label>
+                                            </span>
+                                            <span class="count_top"></span>
+                                            <div class="count">
+                                                <select name="editar_tipo_seguro" class="form-select form-control-sm col-md-12" aria-label="Default select example">
+                                                    {% for value, label in TIPO_CHOICES %}
+                                                        <option value="{{ value }}" {% if value == seguro.tipo_seguro %}selected{% endif %}>
+                                                        {{ label }}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                          </div>
+                                            <div class="mb-3">
+                                              <label for="editar_nro_poliza" class="form-label">Número de póliza: </label>
+                                              <input name="editar_nro_poliza" type="text" class="form-control" value="{{ seguro.nro_poliza }}" aria-label="Número de póliza" aria-describedby="basic-addon1">
+                                            </div>
+              
+                                            <div class="mb-3">
+                                              <label for="editar_vigencia_desde" class="form-label">Vigencia Desde:</label>
+                                              <input type="date" class="form-control" id="editar_vigencia_desde" value="{{ seguro.vigencia_desde|date:"Y-m-d" }}" name="editar_vigencia_desde" required>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="editar_vigencia_hasta" class="form-label">Vigencia Hasta:</label>
+                                                <input type="date" class="form-control" id="editar_vigencia_hasta " value="{{ seguro.vigencia_hasta|date:"Y-m-d" }}" name="editar_vigencia_hasta">
+                                            </div>
+
                                         </div>
                                       </div>
                                       <div class="modal-footer">
@@ -321,34 +403,22 @@
                               </form>
                           
                               <!-- Botón de Eliminar -->
-                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_broker' broker.id %}">
+                              <button type="submit" class="btn btn-lg btn-link p-0 border-0 m-0 eliminar-elemento confirmar-eliminar" data-url="{% url 'delete_seguro' seguro.id %}">
                                 <i class="fa fa-trash-o text-danger"></i>
                               </button>
                             </div>
                           </td>
-                          <td>{{ broker.nombre }}</td>
-                          <td>
-                            <img src="{{ broker.logo.url }}" alt="{{ broker.nombre }}" style="max-width: 100px; height: auto;">
-                          </td>
-                          <td>{{ broker.pais }}</td>
-                          <td>{{ broker.domicilio_oficina }}</td>
-                          <td>{{ broker.url_web }}</td>
-                          <td>{{ broker.matriz.nombre }}</td>
-                          {% if broker.activo %}
-                          <td class="green">Si</td>
-  
-                          {% else %}
-                          <td class="red">No</td>
-  
-                          {% endif %}
+                          <td>{{ seguro.pais }}</td>
+                          <td>{{ seguro.matriz.nombre }}</td>
+                          <td>{{ seguro.empresa.nombre }}</td>
+                          <td>{{ seguro.broker.nombre }}</td>
+                          <td>{{ seguro.moneda }}</td>
+                          <td>{{ seguro.aseguradora.nombre }}</td>
+                          <td>{{ seguro.tipo_seguro }}</td>
+                          <td>{{ seguro.nro_poliza }}</td>
+                          <td>{{ seguro.vigencia_desde|date:"d-m-Y" }}</td>
+                          <td>{{ seguro.vigencia_hasta|date:"d-m-Y" }}</td>
                           
-                          <td>
-                            {% for contacto in broker.contactos.all %}
-                              {{ contacto.nombre }}<br>
-                            {% empty %}
-                              No hay contactos asignados
-                            {% endfor %}
-                          </td>
         
 
                           

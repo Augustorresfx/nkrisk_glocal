@@ -39,15 +39,49 @@ class SeguroView(View):
         paises = Pais.objects.all()
 
         matrices = Matriz.objects.all()
+        
+        empresas = Empresa.objects.all()
+        
+        brokers = Broker.objects.all()
+        
+        aseguradoras = Aseguradora.objects.all()
 
         contactos = Contacto.objects.all()
+        
+        TIPO_CHOICES = [
+            ('casualty-3b', 'CASUALTY - 3B'),
+            ('casualty-dyo', 'CASUALTY - D&O'),
+            ('casualty-rc_l', 'CASUALTY - RESPONSABILIDAD CIVIL / LIABILITY'),
+            ('casualty-rc_p', 'CASUALTY - RESPONSABILIDAD CIVIL DE PRODUCTOS'),
+            ('casualty-rc_r', 'CASUALTY - RESPONSABILIDAD CIVIL DE RECALL'),
+            ('casualty-rc_p_eyo', 'CASUALTY - RESPONSABILIDAD CIVIL DE PROFESIONAL (E&O)'),
+            ('casualty-r_f', 'CASUALTY - ROBO / FIDELITY'),
+            ('otros-cyber-risk', 'OTROS - CYBER RISK'),
+            ('otros-vehiculos', 'OTROS - VEHICULOS'),
+            ('property-cascos_hull', 'PROPOERTY - CASCOS / HULL'),
+            ('property-multiriesgo_prop', 'PROPERTY - MULTIRIESGO / PROPERTY'),
+            ('transporte-expo', 'TRANSPORTE (EXPO)'),
+            ('transporte-impo', 'TRANSPORTE (IMPO)'),
+            ('accidentes-personales', 'ACCIDENTES PERSONALES')
+        ]
+        MONEDA_CHOICES = [
+            ('ars', 'ARS'),
+            ('usd', 'USD'),
+            ('eur', 'EUR'),
 
+        ]
+        
         context = {
             'seguros': seguros,
             'pages': filter_pages,
             'paises': paises,
             'matrices': matrices,
+            'brokers': brokers,
+            'empresas': empresas,
+            'aseguradoras': aseguradoras,
             'contactos': contactos,
+            'MONEDA_CHOICES': MONEDA_CHOICES,
+            'TIPO_CHOICES': TIPO_CHOICES,
             'filtros': {
                 'nombre': nombre_filtro,
                 'pais': pais_filtro,
@@ -66,15 +100,7 @@ class SeguroView(View):
         nro_poliza = request.POST.get('nuevo_nro_poliza')
         vigencia_desde = request.POST.get('nuevo_vigencia_desde')
         vigencia_hasta = request.POST.get('nuevo_vigencia_hasta')
-        prima_neta_emitida = request.POST.get('nuevo_prima_neta_emitida')
-        limite_asegurado = request.POST.get('nuevo_limite_asegurado')
-        activo = request.POST.get('nuevo_activo')
-        contactos_ids = request.POST.getlist('nuevo_contacto') 
-         
-        if activo == "on":
-            activo = True
-        else:
-            activo = False
+
         
         # Obtener objetos relacionados
         pais = get_object_or_404(Pais, id=pais_id)
@@ -96,9 +122,7 @@ class SeguroView(View):
             'nro_poliza': {'new': nro_poliza},
             'vigencia_desde': {'new': vigencia_desde},
             'vigencia_hasta': {'new': vigencia_hasta},
-            'prima_neta_emitida': {'new': prima_neta_emitida},
-            'limite_asegurado': {'new': limite_asegurado},
-            'activo': {'new': activo},
+
         }
 
         if user.is_superuser:
@@ -115,9 +139,7 @@ class SeguroView(View):
                     nro_poliza=nro_poliza,
                     vigencia_desde=vigencia_desde,
                     vigencia_hasta=vigencia_hasta,
-                    prima_neta_emitida=prima_neta_emitida,
-                    limite_asegurado=limite_asegurado,
-                    activo=activo,
+
                     modified_by = user,
                 )
                 messages.success(request, 'Se creó un nuevo elemento de forma exitosas.')
@@ -153,9 +175,7 @@ class EditarSeguroView(View):
         nro_poliza = request.POST.get('editar_nro_poliza')
         vigencia_desde = request.POST.get('editar_vigencia_desde')
         vigencia_hasta = request.POST.get('editar_vigencia_hasta')
-        prima_neta_emitida = request.POST.get('editar_prima_neta_emitida')
-        limite_asegurado = request.POST.get('editar_limite_asegurado')
-        activo = 'editar_activo' in request.POST
+
         
         # Obtener objetos relacionados
         pais = get_object_or_404(Pais, id=pais_id)
@@ -188,12 +208,7 @@ class EditarSeguroView(View):
                 seguro.vigencia_desde = vigencia_desde
             if seguro.vigencia_hasta != vigencia_hasta:
                 seguro.vigencia_hasta = vigencia_hasta
-            if seguro.prima_neta_emitida != prima_neta_emitida:
-                seguro.prima_neta_emitida = prima_neta_emitida
-            if seguro.limite_asegurado != limite_asegurado:
-                seguro.limite_asegurado = limite_asegurado
-            if seguro.activo != activo:
-                seguro.activo = activo
+
 
             seguro.modified_by = user  # Registrar quién realizó el cambio
             seguro.save(track_changes=False)  # Evitar registrar PendingChange
@@ -241,18 +256,6 @@ class EditarSeguroView(View):
             if seguro.vigencia_hasta != vigencia_hasta:
                 changes['vigencia_hasta'] = {'old': seguro.vigencia_hasta, 'new': vigencia_hasta}
                 seguro.vigencia_hasta = vigencia_hasta
-            
-            if seguro.prima_neta_emitida != prima_neta_emitida:
-                changes['prima_neta_emitida'] = {'old': seguro.prima_neta_emitida, 'new': prima_neta_emitida}
-                seguro.prima_neta_emitida = prima_neta_emitida
-                
-            if seguro.limite_asegurado != limite_asegurado:
-                changes['limite_asegurado'] = {'old': seguro.limite_asegurado, 'new': limite_asegurado}
-                seguro.limite_asegurado = limite_asegurado
-
-            if seguro.activo != activo:
-                changes['activo'] = {'old': seguro.activo, 'new': activo}
-                seguro.activo = activo
 
             if changes:
                 try:
